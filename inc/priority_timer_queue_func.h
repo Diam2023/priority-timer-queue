@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 /**
  * @brief 数据初始长度
  */
@@ -331,5 +335,9 @@ queue_node_type *__create_queue_node(node_func_type node_func_, uint8_t inner_, 
  * @return queue_node_type* 返回创建的 {@link create_asynchronous_node} 指针，返回创建的queue_node_type指针 
  */
 queue_node_type *create_timer_node(node_func_type node_func_, uint8_t inner_, queue_timer_t timer_, void *args_);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // PRIORITY_TIMER_QUEUE_FUNC_H
