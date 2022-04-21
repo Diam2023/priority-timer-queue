@@ -16,6 +16,11 @@
  * 
  * * @details 添加了处理返回值的回调函数.
  * 
+ * @note version: 1.2
+ * @description: bug
+ * 
+ * * @details 解决不能实时更改timer问题
+ * 
  * 
  * *********************************************************************************
  */
@@ -67,7 +72,7 @@ typedef unsigned char uint8_t;
 /**
  * @brief 队列中储存节点数量的类型
  */
-typedef unsigned long size_t;
+// typedef unsigned long size_t;
 
 /**
  * @brief 储存定时器周期数的数据类型
@@ -139,21 +144,6 @@ typedef struct queue_node_type
      */
     node_func_type _performance_func;
 } queue_node_type;
-
-/**
- * @brief 节点储存的数组
- */
-queue_node_type *queue_timer_nodes;
-
-/**
- * @brief 目前储存的节点个数
- */
-volatile static size_t queue_timer_node_size;
-
-/**
- * @brief 目前数组能储存的节点数
- */
-volatile static size_t queue_timer_node_length;
 
 /**
  * @brief 初始化10个可容纳节点的数组 

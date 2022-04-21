@@ -20,6 +20,8 @@
 
 #include "priority_timer_queue_func.h"
 
+extern queue_node_type *queue_timer_nodes;
+
 typedef struct test_structure
 {
     int a;

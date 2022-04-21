@@ -1,6 +1,19 @@
 #include "priority_timer_queue_func.h"
 
-#include <stdio.h>
+/**
+ * @brief 节点储存的数组
+ */
+queue_node_type *queue_timer_nodes;
+
+/**
+ * @brief 目前储存的节点个数
+ */
+volatile static size_t queue_timer_node_size;
+
+/**
+ * @brief 目前数组能储存的节点数
+ */
+volatile static size_t queue_timer_node_length;
 
 void init_priority_queue()
 {
@@ -72,7 +85,7 @@ void rank_timer()
         // 分配临时内存用于交换内存数据
         temp = ALLOC_NODE();
 
-        queue_timer_t temp_timer = QUEUE_TIMER_TYPE_MAX;
+        // queue_timer_t temp_timer = QUEUE_TIMER_TYPE_MAX;
 
         for (size_t i = (queue_timer_node_size - 1); i > 0; i--)
         {
@@ -222,7 +235,10 @@ void execute_node(queue_node_type *node_)
             node_->_loop--; // 计数器减一
         }
         // 循环和执行时重置计数周期并加入到队列
-        node_->_timer = node_->_loop_timer;
+        if (node_->_timer == 0)
+        {
+            node_->_timer = node_->_loop_timer;
+        }
         __push_node(node_);
     }
 
