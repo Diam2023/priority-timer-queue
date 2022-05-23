@@ -198,6 +198,7 @@ MONO_EraseNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
 #endif
     }
   }
+  return NULL;
 }
 
 MONO_PriorityTimerNode *
@@ -229,6 +230,7 @@ MONO_EraseNodeByIndex(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
 #endif
   return node;
   }
+  return NULL;
 }
 void MONO_RunTimerNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
 #ifdef MONO_USE_FULL_PTQ_MEMBER
@@ -339,8 +341,8 @@ uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
       ._timer = timer_};
 
 #ifdef MONO_USE_FULL_PTQ_MEMBER
-  queue_->PushNode(queue_, &node);
+  return queue_->PushNode(queue_, &node);
 #else
-  MONO_PushNode(queue_, &node);
+  return MONO_PushNode(queue_, &node);
 #endif
 }
