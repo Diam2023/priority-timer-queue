@@ -109,8 +109,7 @@ MONO_FindNodeById(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint16_t id_) {
 uint16_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                        MONO_PriorityTimerNode *node_) {
 #ifdef MONO_USE_FULL_PTQ_MEMBER
-  (queue_->nodes + queue_->size)
-      ->CopyNode((queue_->nodes + queue_->size), node_);
+  node_->CopyNode((queue_->nodes + queue_->size), node_);
   queue_->size++;
 #else
   MONO_CopyNode((queue_->nodes + queue_->size), node_);
