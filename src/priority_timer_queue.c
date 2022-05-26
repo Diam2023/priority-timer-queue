@@ -62,15 +62,12 @@ void MONO_RankTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
     // 分配临时内存用于交换内存数据
     temp = MONO_ALLOC_NODE();
 
-    // node_timer_t temp_timer = QUEUE_TIMER_TYPE_MAX;
-
     for (size_t i = (queue_->size - 1); i > 0; i--) {
       // 排序指标为节点的剩余时钟周期数_timer
       if (queue_->nodes[i]._timer < queue_->nodes[i - 1]._timer) {
         memmove(temp, (queue_->nodes + (i - 1)), MONO_NODE_SIZE);
         memmove((queue_->nodes + (i - 1)), (queue_->nodes + i), MONO_NODE_SIZE);
         memmove((queue_->nodes + i), temp, MONO_NODE_SIZE);
-        // memset(temp, 0, MONO_NODE_SIZE);
       }
 
       if ((queue_->nodes[i]._timer == queue_->nodes[i - 1]._timer) &&
@@ -82,11 +79,9 @@ void MONO_RankTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
           memmove((queue_->nodes + (i - 1)), (queue_->nodes + i),
                   MONO_NODE_SIZE);
           memmove((queue_->nodes + i), temp, MONO_NODE_SIZE);
-          // memset(temp, 0, MONO_NODE_SIZE);
         }
       }
     }
-
 // 释放临时内存
 #ifdef MONO_USE_FULL_PTN_MEMBER
     queue_->nodes->DeallocNode(temp);
@@ -236,6 +231,10 @@ void MONO_RunTimerNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
     size_t position_index = 0;
     size_t now_size = queue_->size;
     for (size_t i = 0; i < now_size; i++) {
+      if (queue_->nodes[position_index]._id == 0)
+      {
+        continue;
+      }
       // 如果未使能则跳过
       if (queue_->nodes[position_index]._enabled == 0 ||
           queue_->nodes[position_index]._inner != 0) {
@@ -294,6 +293,10 @@ void MONO_RunInnerTimerNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
     size_t position_index = 0;
     size_t now_size = queue_->size;
     for (size_t i = 0; i < now_size; i++) {
+      if (queue_->nodes[position_index]._id == 0)
+      {
+        continue;
+      }
       // 如果未使能则跳过
       if (queue_->nodes[position_index]._enabled == 0 ||
           queue_->nodes[position_index]._inner == 0) {

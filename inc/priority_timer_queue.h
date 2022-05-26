@@ -77,7 +77,7 @@ typedef struct MONO_PriorityTimerQueue_s {
   MONO_PriorityTimerNode *(*EraseNode)(struct MONO_PriorityTimerQueue_s *,
                                        MONO_PriorityTimerNode *);
   MONO_PriorityTimerNode *(*EraseNodeByIndex)(
-      struct MONO_PriorityTimerQueue_s *, uint16_t);
+      struct MONO_PriorityTimerQueue_s *, size_t);
   void (*RunTimerNode)(struct MONO_PriorityTimerQueue_s *);
   void (*RunInnerTimerNode)(struct MONO_PriorityTimerQueue_s *);
   uint8_t (*Size)(struct MONO_PriorityTimerQueue_s *);
