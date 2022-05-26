@@ -140,6 +140,15 @@ typedef struct MONO_PriorityTimerNode_s {
 
   void (*RegisterResultPerformance)(MONO_NodeFunction_t,
                                     struct MONO_PriorityTimerNode_s *);
+
+  struct MONO_PriorityTimerNode_s* (*SetEnabled)(uint8_t, struct MONO_PriorityTimerNode_s *);
+  struct MONO_PriorityTimerNode_s* (*SetTimer)(MONO_NodeTimer_t, struct MONO_PriorityTimerNode_s *);
+  struct MONO_PriorityTimerNode_s* (*SetLoop)(uint8_t, struct MONO_PriorityTimerNode_s *);
+  struct MONO_PriorityTimerNode_s* (*SetLoopTimer)(MONO_NodeTimer_t, struct MONO_PriorityTimerNode_s *);
+
+  struct MONO_PriorityTimerNode_s* (*SetPriority)(uint8_t, struct MONO_PriorityTimerNode_s *);
+  struct MONO_PriorityTimerNode_s* (*SetArgs)(void *, struct MONO_PriorityTimerNode_s *);
+  // struct MONO_PriorityTimerNode_s* (*RegisterResultPerformance)(MONO_NodeFunction_t, struct MONO_PriorityTimerNode_s *);
 #endif
 
 } MONO_PriorityTimerNode;
@@ -324,6 +333,13 @@ MONO__CreateQueueNode(MONO_NodeFunction_t node_func_, uint8_t inner_,
   node->CopyNode = &MONO_CopyNode;
 
   node->RegisterResultPerformance = &MONO_RegisterResultPerformance;
+
+  node->SetEnabled = &MONO_SetEnabled;
+  node->SetTimer = &MONO_SetTimer;
+  node->SetPriority = &MONO_SetPriority;
+  node->SetLoop = &MONO_SetLoop;
+  node->SetLoopTimer = &MONO_SetLoopTimer;
+  node->SetArgs = &MONO_SetArgs;
 
 #endif
   return node;
