@@ -21,6 +21,7 @@ MONO_PriorityTimerQueue *MONO_CreatePriorityQueue() {
   queue->RunTimerNode = &MONO_RunTimerNode;
   queue->RunInnerTimerNode = &MONO_RunInnerTimerNode;
   queue->Size = &MONO_Size;
+  queue->EraseNodeByIndex = &MONO_EraseNodeByIndex;
   queue->PushNodeFullArguments = &MONO_PushNodeFullArguments;
 
 #endif
@@ -69,7 +70,7 @@ void MONO_RankTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
         memmove(temp, (queue_->nodes + (i - 1)), MONO_NODE_SIZE);
         memmove((queue_->nodes + (i - 1)), (queue_->nodes + i), MONO_NODE_SIZE);
         memmove((queue_->nodes + i), temp, MONO_NODE_SIZE);
-        memset(temp, 0, MONO_NODE_SIZE);
+        // memset(temp, 0, MONO_NODE_SIZE);
       }
 
       if ((queue_->nodes[i]._timer == queue_->nodes[i - 1]._timer) &&
@@ -81,16 +82,15 @@ void MONO_RankTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
           memmove((queue_->nodes + (i - 1)), (queue_->nodes + i),
                   MONO_NODE_SIZE);
           memmove((queue_->nodes + i), temp, MONO_NODE_SIZE);
-          memset(temp, 0, MONO_NODE_SIZE);
+          // memset(temp, 0, MONO_NODE_SIZE);
         }
       }
     }
 
 // 释放临时内存
-#ifdef MONO_USE_FULL_PTQ_MEMBER
-    temp->DeallocNode(temp);
+#ifdef MONO_USE_FULL_PTN_MEMBER
+    queue_->nodes->DeallocNode(temp);
 #else
-
     MONO_DeallocNode(temp);
 #endif
   }
@@ -108,7 +108,7 @@ MONO_FindNodeById(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint16_t id_) {
 
 uint16_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                        MONO_PriorityTimerNode *node_) {
-#ifdef MONO_USE_FULL_PTQ_MEMBER
+#ifdef MONO_USE_FULL_PTN_MEMBER
   node_->CopyNode((queue_->nodes + queue_->size), node_);
   queue_->size++;
 #else
@@ -125,9 +125,12 @@ uint16_t MONO_PushNodeRelease(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
   uint16_t id;
 #ifdef MONO_USE_FULL_PTQ_MEMBER
   id = queue_->PushNode(queue_, node_);
-  node_->DeallocNode(node_);
 #else
   id = MONO_PushNode(queue_, node_);
+#endif
+#ifdef MONO_USE_FULL_PTN_MEMBER
+  node_->DeallocNode(node_);
+#else
   MONO_DeallocNode(node_);
 #endif
   return id;
@@ -165,34 +168,26 @@ MONO_PopNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
 
 MONO_PriorityTimerNode *
 MONO_PopNodeById(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint16_t id_) {
-  MONO_PriorityTimerNode *node = NULL;
   for (size_t i = 0; i < queue_->size; i++) {
     if ((queue_->nodes + i)->_id == id_) {
-      node = MONO_ALLOC_NODE();
 #ifdef MONO_USE_FULL_PTQ_MEMBER
-      node->CopyNode(node, queue_->nodes + i);
       return queue_->EraseNodeByIndex(queue_, i);
 #else
-      MONO_CopyNode(node, queue_->nodes + i);
       return MONO_EraseNodeByIndex(queue_, i);
 #endif
     }
   }
-  return node;
+  return NULL;
 }
 
 MONO_PriorityTimerNode *
 MONO_EraseNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                MONO_PriorityTimerNode *node_) {
-  MONO_PriorityTimerNode *node = NULL;
   for (size_t i = 0; i < queue_->size; i++) {
     if ((queue_->nodes + i)->_id == node_->_id) {
-      node = MONO_ALLOC_NODE();
 #ifdef MONO_USE_FULL_PTQ_MEMBER
-      node->CopyNode(node, queue_->nodes + i);
       return queue_->EraseNodeByIndex(queue_, i);
 #else
-      MONO_CopyNode(node, queue_->nodes + i);
       return MONO_EraseNodeByIndex(queue_, i);
 #endif
     }
@@ -252,11 +247,30 @@ void MONO_RunTimerNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
         // 取队列中top0的节点
 #ifdef MONO_USE_FULL_PTQ_MEMBER
         node = queue_->PopNodeById(queue_, queue_->nodes->_id);
-        node->ExecuteNode(node);
 #else
         node = MONO_PopNodeById(queue_, queue_->nodes->_id);
+#endif
+#ifdef MONO_USE_FULL_PTN_MEMBER
+        node->ExecuteNode(node);
+#else
         MONO_ExecuteNode(node);
 #endif
+        if (node->_loop < UINT8_MAX && node->_loop > 0)
+        {
+          node->_loop--;
+        }
+        if (node->_timer <= 0)
+        {
+          node->_timer = node->_loop_timer;
+        }
+        if (node->_loop > 0)
+        {
+#ifdef MONO_USE_FULL_PTQ_MEMBER
+          queue_->PushNodeRelease(queue_, node);
+#else
+          MONO_PushNodeRelease(queue_, node);
+#endif
+        }
       } else {
         // 当定时器不为0时跳出循环
         break;
@@ -291,11 +305,30 @@ void MONO_RunInnerTimerNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
         // 取队列中top0的节点
 #ifdef MONO_USE_FULL_PTQ_MEMBER
         node = queue_->PopNodeById(queue_, queue_->nodes->_id);
-        node->ExecuteNode(node);
 #else
         node = MONO_PopNodeById(queue_, queue_->nodes->_id);
+#endif
+#ifdef MONO_USE_FULL_PTN_MEMBER
+        node->ExecuteNode(node);
+#else
         MONO_ExecuteNode(node);
 #endif
+        if (node->_loop < UINT8_MAX && node->_loop > 0)
+        {
+          node->_loop--;
+        }
+        if (node->_timer <= 0)
+        {
+          node->_timer = node->_loop_timer;
+        }
+        if (node->_loop > 0)
+        {
+#ifdef MONO_USE_FULL_PTQ_MEMBER
+          queue_->PushNodeRelease(queue_, node);
+#else
+          MONO_PushNodeRelease(queue_, node);
+#endif
+        }
       } else {
         // 当定时器不为0时跳出循环
         break;
@@ -322,7 +355,7 @@ uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                                     MONO_NodeFunction_t performance_func_) {
   MONO_PriorityTimerNode node = {
 
-#ifdef MONO_USE_FULL_PTQ_MEMBER
+#ifdef MONO_USE_FULL_PTN_MEMBER
       .CopyNode = MONO_CopyNode,
       .DeallocNode = MONO_DeallocNode,
       .ExecuteNode = MONO_ExecuteNode,
