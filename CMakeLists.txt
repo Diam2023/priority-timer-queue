@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
+
 project(libmono VERSION 1.3)
+add_library(libmono INTERFACE)
 
 target_compile_definitions(libmono INTERFACE
     # MONO_USE_FULL_PTQ_MEMBER
