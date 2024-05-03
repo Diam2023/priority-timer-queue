@@ -15,8 +15,7 @@ target_sources(libmono INTERFACE
 	./src/priority_timer_queue.c
 )
 
-add_executable(PriorityTimerQueue ./test_for_c_main.c ${SRCS})
-
+# add_executable(PriorityTimerQueue ./test_for_c_main.c ${SRCS})
 
 target_link_directories(libmono INTERFACE
 )
