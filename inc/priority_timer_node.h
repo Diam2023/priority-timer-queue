@@ -47,6 +47,29 @@ extern "C" {
 
 #define MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT MONO_PriorityTimerNode *node_
 
+// 创建一个只运行一次且默认优先级的定时node
+
+/**
+ * @brief 创建一个默认优先级的定时node
+ * @param  f_            节点函数指针
+ * @param  i_            若为0则在中断函数外部执行
+ * @param  t_            定时器周期数
+ * @param  v_            等待执行函数的参数
+ * @return MONO_PriorityTimerNode* 返回创建的指针
+ */
+#define MONO_CreateQueueNode(f_, i_, t_, v_) MONO_CreateQueueNodeFull(f_, i_, 1, t_, 0, t_, UINT8_MAX, v_, NULL)
+
+/**
+ * @brief 创建一个运行指定次数的Node
+ * @param  f_            节点函数指针
+ * @param  i_            若为0则在中断函数外部执行
+ * @param  t_            定时器周期数
+ * @param  c_            循环次数 UINT8_MAX则无限循环
+ * @param  v_            等待执行函数的参数
+ * @return MONO_PriorityTimerNode* 返回创建的指针
+ */
+#define MONO_CreateQueueNodeCount(f_, i_, t_, c_, v_) MONO_CreateQueueNodeFull(f_, i_, 1, t_, c_, t_, UINT8_MAX, v_, NULL)
+
 /**
  * @brief 节点标志的基本类型
  */
@@ -278,7 +301,7 @@ static void
 MONO_RegisterResultPerformance(MONO_NodeFunction_t func_,
                                MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   node_->_performance_func = func_;
-};
+}
 
 /**
  * @brief 创建node以便加入到队列
@@ -296,7 +319,7 @@ MONO_RegisterResultPerformance(MONO_NodeFunction_t func_,
  * 返回创建好的MONO_PriorityTimerNode_t类型的指针。
  */
 static MONO_PriorityTimerNode *
-MONO__CreateQueueNode(MONO_NodeFunction_t node_func_, uint8_t inner_,
+MONO_CreateQueueNodeFull(MONO_NodeFunction_t node_func_, uint8_t inner_,
                       uint8_t enabled_, MONO_NodeTimer_t timer_, uint8_t loop_,
                       MONO_NodeTimer_t loop_timer_, uint8_t priority_,
                       void *args_, MONO_NodeFunction_t performance_func_) {
@@ -343,21 +366,6 @@ MONO__CreateQueueNode(MONO_NodeFunction_t node_func_, uint8_t inner_,
 
 #endif
   return node;
-}
-
-/**
- * @brief 创建一个默认优先级的定时node
- * @param  node_func_       节点函数指针
- * @param  inner_           若为0则在中断函数外部执行
- * @param  timer_           定时器周期数
- * @param  args_            等待执行函数的参数
- * @return MONO_PriorityTimerNode* 返回创建的指针
- */
-static MONO_PriorityTimerNode *
-MONO_CreateQueueNode(MONO_NodeFunction_t node_func_, uint8_t inner_,
-                     MONO_NodeTimer_t timer_, void *args_) {
-  return MONO__CreateQueueNode(node_func_, inner_, 1, timer_, 0, timer_,
-                               UINT8_MAX, args_, NULL);
 }
 
 #ifdef __cplusplus
