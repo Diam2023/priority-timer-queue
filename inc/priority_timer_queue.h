@@ -23,7 +23,11 @@
  * @note version: 1.3
  * @description: 重构代码
  * @date 2022-05-23 10:06:31
- *
+ * 
+ * @note version: 1.4
+ * @description: 添加TimerTick计数器
+ * @date 2025-05-15
+ * 
  * *********************************************************************************
  */
 
@@ -222,6 +226,15 @@ uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                                     MONO_NodeTimer_t loop_timer_,
                                     uint8_t priority_, void *args_,
                                     MONO_NodeFunction_t performance_func_);
+
+
+/**
+ * @brief 获取当前TimeTick
+ * 
+ * @since v1.4
+ * @return uint32_t TimeTick
+ */
+uint32_t MONO_GetTimeTick(void);
 
 // TODO 增加debug选项
 // #ifdef MONO_PTQ_DEBUG

@@ -1,5 +1,11 @@
 #include "priority_timer_queue.h"
 
+/**
+ * @brief TimerTick计数
+ * @since v1.4
+ */
+static uint32_t s_timerTick = 0;
+
 MONO_PriorityTimerQueue *MONO_CreatePriorityQueue() {
   MONO_PriorityTimerQueue *queue = MONO_ALLOC_QUEUE();
   queue->nodes = MONO_ALLOC_NODES(MONO_DEFAULT_LENGTH);
@@ -132,7 +138,7 @@ uint16_t MONO_PushNodeRelease(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
 }
 
 void MONO_TimerRunning(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
-
+  s_timerTick++;
 #ifdef MONO_USE_FULL_PTQ_MEMBER
   if (queue_->Size(queue_) != 0) {
 #else
@@ -380,4 +386,9 @@ uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
 #else
   return MONO_PushNode(queue_, &node);
 #endif
+}
+
+uint32_t MONO_GetTimeTick(void)
+{
+  return s_timerTick;
 }
