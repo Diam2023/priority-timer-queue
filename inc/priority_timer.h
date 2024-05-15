@@ -28,6 +28,11 @@
  * @description: 添加TimerTick计数器
  * @date 2025-05-15
  * 
+ * @note version: 2.1
+ * @description: 修改项目结构
+ * @date 2025-05-15
+ * 
+ * 
  * *********************************************************************************
  */
 
@@ -38,10 +43,10 @@
 extern "C" {
 #endif
 
-#define MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT                             \
-  MONO_PriorityTimerQueue *queue_
-#define MONO_ALLOC_QUEUE()                                                     \
-  (MONO_PriorityTimerQueue *)calloc(1, sizeof(MONO_PriorityTimerQueue))
+#define MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT \
+    MONO_PriorityTimerQueue *queue_
+#define MONO_ALLOC_QUEUE() \
+    (MONO_PriorityTimerQueue *) calloc(1, sizeof(MONO_PriorityTimerQueue))
 
 #define CreatePriorityTimerQueue() MONO_CreatePriorityQueue();
 
@@ -49,46 +54,46 @@ extern "C" {
 
 typedef struct MONO_PriorityTimerQueue_s {
 
-  /**
-   * @brief 节点储存的数组
-   */
-  MONO_PriorityTimerNode *nodes;
+    /**
+     * @brief 节点储存的数组
+     */
+    MONO_PriorityTimerNode *nodes;
 
-  /**
-   * @brief 目前储存的节点个数
-   */
-  size_t size;
+    /**
+     * @brief 目前储存的节点个数
+     */
+    size_t size;
 
-  /**
-   * @brief 目前数组能储存的节点数
-   */
-  size_t capacity;
+    /**
+     * @brief 目前数组能储存的节点数
+     */
+    size_t capacity;
 
 #ifdef MONO_USE_FULL_PTQ_MEMBER
-  void (*IncreaseNodes)(struct MONO_PriorityTimerQueue_s *);
-  void (*DeallocateQueueMemory)(struct MONO_PriorityTimerQueue_s *);
-  void (*RankTimer)(struct MONO_PriorityTimerQueue_s *);
-  MONO_PriorityTimerNode *(*FindNodeById)(struct MONO_PriorityTimerQueue_s *,
-                                          uint16_t);
-  uint16_t (*PushNode)(struct MONO_PriorityTimerQueue_s *,
-                       MONO_PriorityTimerNode *);
-  uint16_t (*PushNodeRelease)(struct MONO_PriorityTimerQueue_s *,
-                              MONO_PriorityTimerNode *);
-  void (*TimerRunning)(struct MONO_PriorityTimerQueue_s *);
-  MONO_PriorityTimerNode *(*PopNode)(struct MONO_PriorityTimerQueue_s *);
-  MONO_PriorityTimerNode *(*PopNodeById)(struct MONO_PriorityTimerQueue_s *,
-                                         uint16_t);
-  MONO_PriorityTimerNode *(*EraseNode)(struct MONO_PriorityTimerQueue_s *,
-                                       MONO_PriorityTimerNode *);
-  MONO_PriorityTimerNode *(*EraseNodeByIndex)(
-      struct MONO_PriorityTimerQueue_s *, size_t);
-  void (*RunTimerNode)(struct MONO_PriorityTimerQueue_s *);
-  void (*RunInnerTimerNode)(struct MONO_PriorityTimerQueue_s *);
-  uint8_t (*Size)(struct MONO_PriorityTimerQueue_s *);
-  uint16_t (*PushNodeFullArguments)(struct MONO_PriorityTimerQueue_s *,
-                                    MONO_NodeFunction_t, uint8_t, uint8_t,
-                                    MONO_NodeTimer_t, uint8_t, MONO_NodeTimer_t,
-                                    uint8_t, void *, MONO_NodeFunction_t);
+    void (*IncreaseNodes)(struct MONO_PriorityTimerQueue_s *);
+    void (*DeallocateQueueMemory)(struct MONO_PriorityTimerQueue_s *);
+    void (*RankTimer)(struct MONO_PriorityTimerQueue_s *);
+    MONO_PriorityTimerNode *(*FindNodeById)(struct MONO_PriorityTimerQueue_s *,
+                                            uint16_t);
+    uint16_t (*PushNode)(struct MONO_PriorityTimerQueue_s *,
+                         MONO_PriorityTimerNode *);
+    uint16_t (*PushNodeRelease)(struct MONO_PriorityTimerQueue_s *,
+                                MONO_PriorityTimerNode *);
+    void (*TimerRunning)(struct MONO_PriorityTimerQueue_s *);
+    MONO_PriorityTimerNode *(*PopNode)(struct MONO_PriorityTimerQueue_s *);
+    MONO_PriorityTimerNode *(*PopNodeById)(struct MONO_PriorityTimerQueue_s *,
+                                           uint16_t);
+    MONO_PriorityTimerNode *(*EraseNode)(struct MONO_PriorityTimerQueue_s *,
+                                         MONO_PriorityTimerNode *);
+    MONO_PriorityTimerNode *(*EraseNodeByIndex)(
+            struct MONO_PriorityTimerQueue_s *, size_t);
+    void (*RunTimerNode)(struct MONO_PriorityTimerQueue_s *);
+    void (*RunInnerTimerNode)(struct MONO_PriorityTimerQueue_s *);
+    uint8_t (*Size)(struct MONO_PriorityTimerQueue_s *);
+    uint16_t (*PushNodeFullArguments)(struct MONO_PriorityTimerQueue_s *,
+                                      MONO_NodeFunction_t, uint8_t, uint8_t,
+                                      MONO_NodeTimer_t, uint8_t, MONO_NodeTimer_t,
+                                      uint8_t, void *, MONO_NodeFunction_t);
 #endif
 } MONO_PriorityTimerQueue;
 
@@ -96,7 +101,7 @@ typedef struct MONO_PriorityTimerQueue_s {
  * @brief 初始化10个可容纳节点的数组
  * @return MONO_PriorityTimerQueue*: 队列指针
  */
-MONO_PriorityTimerQueue *MONO_CreatePriorityQueue();
+MONO_PriorityTimerQueue *MONO_CreatePriorityQueue(void);
 
 /**
  * @brief 增加可容纳的节点数量
@@ -154,7 +159,7 @@ void MONO_TimerRunning(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
  * @return MONO_PriorityTimerNode*: 节点的指针
  */
 MONO_PriorityTimerNode *
-    MONO_PopNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
+        MONO_PopNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 
 /**
  * @brief 弹出指定id的节点
@@ -240,7 +245,7 @@ uint32_t MONO_GetTimeTick(void);
 // #ifdef MONO_PTQ_DEBUG
 // /**
 //  * @brief 格式化队列
-//  * @return char*: 
+//  * @return char*:
 //  */
 // static const char* MONO_GetQueueFormat(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT)
 // {
@@ -257,4 +262,4 @@ uint32_t MONO_GetTimeTick(void);
 }
 #endif
 
-#endif // PRIORITY_TIMER_QUEUE_INC_PRIORITY_TIMER_QUEUE_H_
+#endif// PRIORITY_TIMER_QUEUE_INC_PRIORITY_TIMER_QUEUE_H_
