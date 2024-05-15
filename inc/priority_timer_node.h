@@ -181,7 +181,7 @@ typedef struct MONO_PriorityTimerNode_s {
  * @brief 执行并清理node
  * @param node_: 节点指针
  */
-static void MONO_ExecuteNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
+__unused static void MONO_ExecuteNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   if (node_ != NULL) {
     // 通过节点储存的参数数据来执行节点函数
     void *result = NULL;
@@ -197,7 +197,7 @@ static void MONO_ExecuteNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
  * @brief 清理node
  * @param  node_    :        待执行node
  */
-static void MONO_DeallocNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
+__unused static void MONO_DeallocNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   memset(node_, 0, sizeof(MONO_PriorityTimerNode));
   free(node_);
 }
@@ -207,7 +207,7 @@ static void MONO_DeallocNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
  * @param  node_dst_: copy到的节点
  * @param  node_src_: 被copy的节点
  */
-static void MONO_CopyNode(MONO_PriorityTimerNode *node_dest_,
+__unused static void MONO_CopyNode(MONO_PriorityTimerNode *node_dest_,
                           MONO_PriorityTimerNode *node_src_) {
   memmove(node_dest_, node_src_, sizeof(MONO_PriorityTimerNode));
 }
@@ -218,7 +218,7 @@ static void MONO_CopyNode(MONO_PriorityTimerNode *node_dest_,
  * @param  node_            节点的指针
  * @return MONO_PriorityTimerNode* 返回操作节点的指针
  */
-static MONO_PriorityTimerNode *
+__unused static MONO_PriorityTimerNode *
 MONO_SetEnabled(uint8_t enabled_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   node_->_enabled = enabled_;
   return node_;
@@ -230,7 +230,7 @@ MONO_SetEnabled(uint8_t enabled_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
  * @param  node_            节点的指针
  * @return MONO_PriorityTimerNode* 返回操作节点的指针
  */
-static MONO_PriorityTimerNode *
+__unused static MONO_PriorityTimerNode *
 MONO_SetTimer(MONO_NodeTimer_t timer_,
               MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   node_->_timer = timer_;
@@ -244,7 +244,7 @@ MONO_SetTimer(MONO_NodeTimer_t timer_,
  * @param  node_            节点的指针
  * @return MONO_PriorityTimerNode* 返回操作节点的指针
  */
-static MONO_PriorityTimerNode *
+__unused static MONO_PriorityTimerNode *
 MONO_SetLoop(uint8_t loop_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   node_->_loop = loop_;
   // 若节点_loop_timer为0且_time不为0则设置_loop_timer的值为_timer的值
@@ -260,7 +260,7 @@ MONO_SetLoop(uint8_t loop_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
  * @param  node_            节点的指针
  * @return MONO_PriorityTimerNode* 返回操作节点的指针
  */
-static MONO_PriorityTimerNode *
+__unused static MONO_PriorityTimerNode *
 MONO_SetLoopTimer(MONO_NodeTimer_t loop_timer_,
                   MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   node_->_loop_timer = loop_timer_;
@@ -273,7 +273,7 @@ MONO_SetLoopTimer(MONO_NodeTimer_t loop_timer_,
  * @param  node_            节点的指针
  * @return MONO_PriorityTimerNode* 返回操作的节点的指针
  */
-static MONO_PriorityTimerNode *
+__unused static MONO_PriorityTimerNode *
 MONO_SetPriority(uint8_t priority_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   node_->_priority = priority_;
   return node_;
@@ -285,7 +285,7 @@ MONO_SetPriority(uint8_t priority_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
  * @param  node_            节点的指针
  * @return MONO_PriorityTimerNode* 返回操作的节点的指针
  */
-static MONO_PriorityTimerNode *
+__unused static MONO_PriorityTimerNode *
 MONO_SetArgs(void *args_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   node_->_args = args_;
   return node_;
@@ -297,7 +297,7 @@ MONO_SetArgs(void *args_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
  * @param  node_            节点的指针
  * @sense: 1.1
  */
-static void
+__unused static void
 MONO_RegisterResultPerformance(MONO_NodeFunction_t func_,
                                MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   node_->_performance_func = func_;
@@ -318,7 +318,7 @@ MONO_RegisterResultPerformance(MONO_NodeFunction_t func_,
  * @return MONO_PriorityTimerNode*
  * 返回创建好的MONO_PriorityTimerNode_t类型的指针。
  */
-static MONO_PriorityTimerNode *
+__unused static MONO_PriorityTimerNode *
 MONO_CreateQueueNodeFull(MONO_NodeFunction_t node_func_, uint8_t inner_,
                       uint8_t enabled_, MONO_NodeTimer_t timer_, uint8_t loop_,
                       MONO_NodeTimer_t loop_timer_, uint8_t priority_,
