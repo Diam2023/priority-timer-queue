@@ -14,7 +14,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE
 )
 
 target_sources(${PROJECT_NAME} INTERFACE
-	./src/priority_timer_queue.c
+	./src/priority_timer.c
 )
 
 # add_executable(PriorityTimerQueue ./test_for_c_main.c ${SRCS})
