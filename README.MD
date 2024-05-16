@@ -1,12 +1,12 @@
 # PriorityTimerQueue
 
+## 项目用于定时任务
+
+
 ## 优先级定时队列运行前各函数部署位置
 ![avatar][positionImg]
 ## 启动流程图
 ![avatar][startImg]
-
-
-
 
 
 ## 内存检测工具
