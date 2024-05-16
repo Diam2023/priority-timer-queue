@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.16.3)
 
 project(libmono VERSION 2.1)
 add_library(${PROJECT_NAME} INTERFACE)
@@ -17,8 +17,6 @@ target_sources(${PROJECT_NAME} INTERFACE
 	./src/priority_timer.c
 )
 
-# add_executable(PriorityTimerQueue ./test_for_c_main.c ${SRCS})
-
 target_link_directories(${PROJECT_NAME} INTERFACE
 )
 
@@ -28,7 +26,9 @@ target_link_libraries(${PROJECT_NAME} INTERFACE
 add_compile_definitions (
 )
 
-# Validate that libapp code is compatible with C standard
+# add_subdirectory(test)
+
+# Validate that libmono code is compatible with C standard
 if(CMAKE_C_STANDARD LESS 11)
     message(ERROR "Generated code requires C11 or higher")
 endif()

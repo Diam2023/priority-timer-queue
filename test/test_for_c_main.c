@@ -18,9 +18,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "priority_timer_queue.h"
+#include "priority_timer.h"
 
-MONO_PriorityTimerQueue *queue;
+MONO_PriorityTimerQueue_t *queue;
 
 typedef struct test_structure {
   int a;
