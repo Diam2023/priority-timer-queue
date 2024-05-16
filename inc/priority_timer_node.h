@@ -100,11 +100,6 @@ typedef unsigned int MONO_NodeTimer_t;
 typedef void *(*MONO_NodeFunction_t)(void *);
 
 /**
- * @brief 唯一id分配
- */
-static uint16_t MONO_g_ptn_auto_id = 1;
-
-/**
  * @brief 队列节点的类型
  */
 typedef struct MONO_PriorityTimerNode_t {

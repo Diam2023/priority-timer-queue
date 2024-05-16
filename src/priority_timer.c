@@ -14,6 +14,11 @@
 
 /************************** NODE **************************/
 
+/**
+ * @brief 唯一id分配
+ */
+static uint16_t MONO_g_ptn_auto_id = 1;
+
 void MONO_ExecuteNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   if (node_ != NULL) {
     // 通过节点储存的参数数据来执行节点函数
