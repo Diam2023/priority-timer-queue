@@ -36,6 +36,10 @@
  * @note version: 2.1
  * @description: 修改项目结构
  * @date 2025-05-15
+ * 
+ * @note version: 2.2
+ * @description: 更改队列实现方式为链表 并预留用户分配空间接口
+ * @date 2025-05-16
  *
  *
  * *********************************************************************************
@@ -67,12 +71,12 @@ typedef struct MONO_PriorityTimerQueue {
   /**
    * @brief 目前储存的节点个数
    */
-  size_t size;
+  uint32_t size;
 
   /**
    * @brief 目前数组能储存的节点数
    */
-  size_t capacity;
+  uint32_t capacity;
 
 #ifdef MONO_USE_FULL_PTQ_MEMBER
   void (*IncreaseNodes)(struct MONO_PriorityTimerQueue *);
@@ -91,7 +95,7 @@ typedef struct MONO_PriorityTimerQueue {
   MONO_PriorityTimerNode_t *(*EraseNode)(struct MONO_PriorityTimerQueue *,
                                          MONO_PriorityTimerNode_t *);
   MONO_PriorityTimerNode_t *(*EraseNodeByIndex)(
-      struct MONO_PriorityTimerQueue *, size_t);
+      struct MONO_PriorityTimerQueue *, uint32_t);
   void (*RunTimerNode)(struct MONO_PriorityTimerQueue *);
   void (*RunInnerTimerNode)(struct MONO_PriorityTimerQueue *);
   uint8_t (*Size)(struct MONO_PriorityTimerQueue *);
@@ -192,7 +196,7 @@ MONO_EraseNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
  * @return MONO_PriorityTimerNode_t*: 节点指针
  */
 MONO_PriorityTimerNode_t *
-MONO_EraseNodeByIndex(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, size_t index);
+MONO_EraseNodeByIndex(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t index);
 
 /**
  * @brief 运行当前定时器周期数为零的所有节点中的函数
