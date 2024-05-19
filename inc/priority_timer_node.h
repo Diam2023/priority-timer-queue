@@ -28,6 +28,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 /**
  * @brief 数据初始长度
@@ -81,14 +82,6 @@ extern "C" {
 
 // -----> Basic Type
 
-#ifndef bool
-
-/**
- * @brief 节点标志的基本类型
- */
-typedef enum { false = 0, true = 1 } bool;
-
-#endif
 
 // -----> Node Type
 
