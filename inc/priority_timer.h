@@ -221,6 +221,15 @@ uint32_t MONO_TimerHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 uint8_t MONO_Size(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 
 /**
+ * @brief 使用函数指针找到队列中的节点
+ * @param  queue_: 队列指针
+ * @param  id_   : 节点id
+ */
+MONO_PriorityTimerNode_t *
+MONO_FindNodeById(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                  MONO_NodeId_t id_);
+
+/**
  * @brief 设置指定节点的运行状态
  *
  * @param queue_: 队列指针

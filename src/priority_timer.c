@@ -317,19 +317,19 @@ static void MONO_TimerRunning(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   }
 }
 
-/**
- * @brief 弹出队列中优先级最高的（第一个）节点
- * @param  queue_: 队列指针
- * @deprecated
- * @since v2.1
- * @return MONO_PriorityTimerNode_t*: 节点的指针
- */
-static MONO_PriorityTimerNode_t *
-MONO_PopNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
-  (void)queue_;
-  return NULL;
-  // TODO 待实现
-}
+// /**
+//  * @brief 弹出队列中优先级最高的（第一个）节点
+//  * @param  queue_: 队列指针
+//  * @deprecated
+//  * @since v2.1
+//  * @return MONO_PriorityTimerNode_t*: 节点的指针
+//  */
+// static MONO_PriorityTimerNode_t *
+// MONO_PopNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
+//   (void)queue_;
+//   return NULL;
+//   // TODO 待实现
+// }
 
 /**
  * @brief 弹出指定id的节点
@@ -463,12 +463,7 @@ uint8_t MONO_Size(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   return queue_->_size;
 }
 
-/**
- * @brief 使用函数指针找到队列中的节点
- * @param  queue_: 队列指针
- * @param  id_   : 节点id
- */
-static MONO_PriorityTimerNode_t *
+MONO_PriorityTimerNode_t *
 MONO_FindNodeById(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                   MONO_NodeId_t id_) {
   if (queue_ == NULL || queue_->_size <= 0) {

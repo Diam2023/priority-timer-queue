@@ -81,42 +81,6 @@ extern "C" {
 
 // -----> Basic Type
 
-#ifndef uint8_t
-
-/**
- * @brief 节点标志的基本类型
- */
-typedef unsigned char uint8_t;
-
-#endif
-
-#ifndef uint16_t
-
-/**
- * @brief 节点标志的基本类型
- */
-typedef unsigned short uint16_t;
-
-#endif
-
-#ifndef uint32_t
-
-/**
- * @brief 节点标志的基本类型
- */
-typedef unsigned int uint32_t;
-
-#endif
-
-#ifndef uint64_t
-
-/**
- * @brief 节点标志的基本类型
- */
-typedef unsigned long uint64_t;
-
-#endif
-
 #ifndef bool
 
 /**
