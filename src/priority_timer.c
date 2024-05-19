@@ -2,13 +2,12 @@
  * @file priority_timer.c
  * @author Diam (monoliths-uni@outlook.com)
  * @brief
- * @version 2.2
+ * @version 2.3
  * @date 2024-05-16
  *
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
- * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
- * reserved.
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
  */
 
 #include "priority_timer.h"
@@ -267,6 +266,8 @@ static MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
   // 非头节点情况
   // 首先查找到合适的timer位置
   while (tempNode != NULL) {
+
+    // TODO 减小缓存队列的开销
     if ((node_->_timer < tempNode->_timer) ||   // 时间小于这个节点
         ((node_->_timer == tempNode->_timer) && // 时间等于这个节点并且
          (node_->_priority < tempNode->_priority) // 优先级小于这个节点

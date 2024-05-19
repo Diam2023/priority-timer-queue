@@ -4,13 +4,12 @@
  * @brief 节点结构
  *
  * @author Diam (monoliths-uni@outlook.com)
- * @version 2.1
+ * @version 2.4
  * @date 2024-05-15
  *
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
- * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
- * reserved.
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
  *
  * @note version: 2.2
  * @description: 更改队列实现方式为链表 并预留用户分配空间接口

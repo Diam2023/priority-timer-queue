@@ -9,8 +9,7 @@
  *
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
- * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
- * reserved.
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
  *
  * *********************************************************************************
  *
@@ -42,7 +41,7 @@
  * @date 2025-05-16
  *
  * @note version: 2.3
- * @description: 更改队列实现方式为链表 并预留用户分配空间接口
+ * @description: 增加缓存队列来缓存关闭的节点
  * @date 2025-05-16
  *
  * *********************************************************************************
