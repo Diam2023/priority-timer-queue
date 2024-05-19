@@ -1,17 +1,14 @@
 /**
- * @file main.c
- * @brief
- * @author monoliths (monoliths-uni@outlook.com)
- * @version 1.0
- * @date 2022-01-02
- *
- * *********************************************************************************
- *
- * @note version:1.0
- * @description: identify
- *
- * *********************************************************************************
+ * @file test_for_c_main.c
+ * @author Diam (monoliths-uni@outlook.com)
+ * @brief 
+ * @version 2.2
+ * @date 2024-05-19
+ * 
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
+ * 
  */
+
 #include <stdlib.h>
 #include <string.h>
 

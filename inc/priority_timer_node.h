@@ -140,11 +140,6 @@ typedef uint32_t MONO_NodeTimer_t;
 typedef uint16_t MONO_NodeId_t;
 
 /**
- * @brief 节点函数类型的指针
- */
-typedef void *(*MONO_NodeFunction_t)(struct MONO_PriorityTimerNode_s *, void *);
-
-/**
  * @brief 队列节点的类型
  */
 struct MONO_PriorityTimerNode_s {
@@ -163,10 +158,12 @@ struct MONO_PriorityTimerNode_s {
   /**
    * @brief 定时执行的函数指针
    */
-  MONO_NodeFunction_t _func; // sizeof 4
+  void *(*_func)(struct MONO_PriorityTimerNode_s *, void *);
 
   /**
    * @brief 如果不为零则为使能
+   *
+   * 截止v2.2版本，该成员即使为false也会参与队列排序，但不运行
    */
   bool _enabled;
 
@@ -203,40 +200,50 @@ struct MONO_PriorityTimerNode_s {
    * @sense: 1.1
    * @details 使用#register_result_performance函数将该属性添加到节点。
    */
-  MONO_NodeFunction_t _performance_func;
+  void *(*_performance_func)(struct MONO_PriorityTimerNode_s *, void *);
 
-#ifdef MONO_USE_FULL_PTN_MEMBER
+  /**
+   * @brief 下一个节点
+   */
+  struct MONO_PriorityTimerNode_s *_next;
 
-  void (*ExecuteNode)(struct MONO_PriorityTimerNode_t *);
+  // #ifdef MONO_USE_FULL_PTN_MEMBER
 
-  // 指向销毁节点函数的函数指针
-  void (*DeallocNode)(struct MONO_PriorityTimerNode_t *);
+  //   void (*ExecuteNode)(struct MONO_PriorityTimerNode_t *);
 
-  void (*CopyNode)(struct MONO_PriorityTimerNode_t *,
-                   struct MONO_PriorityTimerNode_t *);
+  //   // 指向销毁节点函数的函数指针
+  //   void (*DeallocNode)(struct MONO_PriorityTimerNode_t *);
 
-  void (*RegisterResultPerformance)(MONO_NodeFunction_t,
-                                    struct MONO_PriorityTimerNode_t *);
+  //   void (*CopyNode)(struct MONO_PriorityTimerNode_t *,
+  //                    struct MONO_PriorityTimerNode_t *);
 
-  struct MONO_PriorityTimerNode_t *(*SetEnabled)(
-      uint8_t, struct MONO_PriorityTimerNode_t *);
-  struct MONO_PriorityTimerNode_t *(*SetTimer)(
-      MONO_NodeTimer_t, struct MONO_PriorityTimerNode_t *);
-  struct MONO_PriorityTimerNode_t *(*SetLoop)(
-      uint8_t, struct MONO_PriorityTimerNode_t *);
-  struct MONO_PriorityTimerNode_t *(*SetLoopTimer)(
-      MONO_NodeTimer_t, struct MONO_PriorityTimerNode_t *);
+  //   void (*RegisterResultPerformance)(MONO_NodeFunction_t,
+  //                                     struct MONO_PriorityTimerNode_t *);
 
-  struct MONO_PriorityTimerNode_t *(*SetPriority)(
-      uint8_t, struct MONO_PriorityTimerNode_t *);
-  struct MONO_PriorityTimerNode_t *(*SetArgs)(
-      void *, struct MONO_PriorityTimerNode_t *);
-  // struct MONO_PriorityTimerNode_t*
-  // (*RegisterResultPerformance)(MONO_NodeFunction_t, struct
-  // MONO_PriorityTimerNode_t *);
-#endif
+  //   struct MONO_PriorityTimerNode_t *(*SetEnabled)(
+  //       uint8_t, struct MONO_PriorityTimerNode_t *);
+  //   struct MONO_PriorityTimerNode_t *(*SetTimer)(
+  //       MONO_NodeTimer_t, struct MONO_PriorityTimerNode_t *);
+  //   struct MONO_PriorityTimerNode_t *(*SetLoop)(
+  //       uint8_t, struct MONO_PriorityTimerNode_t *);
+  //   struct MONO_PriorityTimerNode_t *(*SetLoopTimer)(
+  //       MONO_NodeTimer_t, struct MONO_PriorityTimerNode_t *);
+
+  //   struct MONO_PriorityTimerNode_t *(*SetPriority)(
+  //       uint8_t, struct MONO_PriorityTimerNode_t *);
+  //   struct MONO_PriorityTimerNode_t *(*SetArgs)(
+  //       void *, struct MONO_PriorityTimerNode_t *);
+  //   // struct MONO_PriorityTimerNode_t*
+  //   // (*RegisterResultPerformance)(MONO_NodeFunction_t, struct
+  //   // MONO_PriorityTimerNode_t *);
+  // #endif
 
 } __attribute__((aligned(4)));
+
+/**
+ * @brief 节点函数类型的指针
+ */
+typedef void *(*MONO_NodeFunction_t)(struct MONO_PriorityTimerNode_s *, void *);
 
 /**
  * @brief 定义类型
@@ -257,12 +264,11 @@ void MONO_ExecuteNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
  *
  * @details 根据用户需要可被用户重载
  */
-MONO_PriorityTimerNode_t *
-    MONO_AllocNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
+MONO_PriorityTimerNode_t *MONO_AllocNode();
 
 /**
  * @brief 清理node
- * @param  node_            待执行node
+ * @param  node_            节点
  *
  * @details 根据用户需要可被用户重载
  */
