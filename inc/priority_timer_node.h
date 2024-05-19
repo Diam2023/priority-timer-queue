@@ -282,63 +282,63 @@ void MONO_DeallocNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
 void MONO_CopyNode(MONO_PriorityTimerNode_t *node_dest_,
                    const MONO_PriorityTimerNode_t *const node_src_);
 
-/**
- * @brief 设置node_是否启用
- * @param  enabled_         若为0则不启用，1为启用
- * @param  node_            节点的指针
- * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
- */
-MONO_PriorityTimerNode_t *
-MONO_SetEnabled(uint8_t enabled_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
+// /**
+//  * @brief 设置node_是否启用
+//  * @param  enabled_         若为0则不启用，1为启用
+//  * @param  node_            节点的指针
+//  * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
+//  */
+// MONO_PriorityTimerNode_t *
+// MONO_SetEnabled(uint8_t enabled_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
 
-/**
- * @brief 设置当次定时时间
- * @param  timer_           timer_ MONO_NodeTimer_t类型的值
- * @param  node_            节点的指针
- * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
- */
-MONO_PriorityTimerNode_t *
-MONO_SetTimer(MONO_NodeTimer_t timer_,
-              MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
+// /**
+//  * @brief 设置当次定时时间
+//  * @param  timer_           timer_ MONO_NodeTimer_t类型的值
+//  * @param  node_            节点的指针
+//  * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
+//  */
+// MONO_PriorityTimerNode_t *
+// MONO_SetTimer(MONO_NodeTimer_t timer_,
+//               MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
 
-/**
- * @brief 设置重载次数
- * @param  loop_            设置循环次数，0为关闭循环 UINT8_MAX为无限循环
- *                          若节点_loop_timer为0且_time不为0
- *                          则设置_loop_timer的值为_timer的值
- * @param  node_            节点的指针
- * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
- */
-MONO_PriorityTimerNode_t *
-MONO_SetLoop(uint8_t loop_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
+// /**
+//  * @brief 设置重载次数
+//  * @param  loop_            设置循环次数，0为关闭循环 UINT8_MAX为无限循环
+//  *                          若节点_loop_timer为0且_time不为0
+//  *                          则设置_loop_timer的值为_timer的值
+//  * @param  node_            节点的指针
+//  * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
+//  */
+// MONO_PriorityTimerNode_t *
+// MONO_SetLoop(uint8_t loop_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
 
-/**
- * @brief 设置重载定时时间
- * @param  loop_timer_      timer_ MONO_NodeTimer_t类型的值
- * @param  node_            节点的指针
- * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
- */
-MONO_PriorityTimerNode_t *
-MONO_SetLoopTimer(MONO_NodeTimer_t loop_timer_,
-                  MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
+// /**
+//  * @brief 设置重载定时时间
+//  * @param  loop_timer_      timer_ MONO_NodeTimer_t类型的值
+//  * @param  node_            节点的指针
+//  * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
+//  */
+// MONO_PriorityTimerNode_t *
+// MONO_SetLoopTimer(MONO_NodeTimer_t loop_timer_,
+//                   MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
 
-/**
- * @brief 设置优先级
- * @param  priority_        0的优先最高
- * @param  node_            节点的指针
- * @return MONO_PriorityTimerNode_t* 返回操作的节点的指针
- */
-MONO_PriorityTimerNode_t *
-MONO_SetPriority(uint8_t priority_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
+// /**
+//  * @brief 设置优先级
+//  * @param  priority_        0的优先最高
+//  * @param  node_            节点的指针
+//  * @return MONO_PriorityTimerNode_t* 返回操作的节点的指针
+//  */
+// MONO_PriorityTimerNode_t *
+// MONO_SetPriority(uint8_t priority_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
 
-/**
- * @brief 设置运行参数
- * @param  args_             节点函数的参数
- * @param  node_            节点的指针
- * @return MONO_PriorityTimerNode_t* 返回操作的节点的指针
- */
-MONO_PriorityTimerNode_t *
-MONO_SetArgs(void *args_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
+// /**
+//  * @brief 设置运行参数
+//  * @param  args_             节点函数的参数
+//  * @param  node_            节点的指针
+//  * @return MONO_PriorityTimerNode_t* 返回操作的节点的指针
+//  */
+// MONO_PriorityTimerNode_t *
+// MONO_SetArgs(void *args_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
 
 /**
  * @brief 注册一个处理节点运行后返回值的函数.

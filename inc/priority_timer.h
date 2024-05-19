@@ -9,7 +9,8 @@
  *
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
- * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
+ * reserved.
  *
  * *********************************************************************************
  *
@@ -40,6 +41,9 @@
  * @description: 更改队列实现方式为链表 并预留用户分配空间接口
  * @date 2025-05-16
  *
+ * @note version: 2.3
+ * @description: 更改队列实现方式为链表 并预留用户分配空间接口
+ * @date 2025-05-16
  *
  * *********************************************************************************
  */
@@ -69,6 +73,13 @@ typedef struct MONO_PriorityTimerQueue_s {
   MONO_PriorityTimerNode_t *_header_node;
 
   /**
+   * @brief 未启用的节点头节点
+   *
+   * @since v2.3
+   */
+  MONO_PriorityTimerNode_t *_disabled_header;
+
+  /**
    * @brief 定时队列当前的计数
    */
   MONO_NodeTimer_t _timer_tick;
@@ -80,7 +91,6 @@ typedef struct MONO_PriorityTimerQueue_s {
 
   /**
    * @brief 定时器打开状态
-   * // TODO 当进入InnerHandler提供锁，并关闭运行状态 确保线程安全
    */
   bool _run_status;
 
@@ -119,6 +129,8 @@ typedef struct MONO_PriorityTimerQueue_s {
   //                                     MONO_NodeFunction_t);
   // #endif
 } MONO_PriorityTimerQueue_t;
+
+/// ***************************************** CORE
 
 /**
  * @brief 分配内存
@@ -159,45 +171,18 @@ bool MONO_TryLockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
  */
 void MONO_UnlockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 
-/**
- * @brief 使用函数指针找到队列中的节点
- * @param  queue_: 队列指针
- * @param  id_   : 节点id
- */
-MONO_PriorityTimerNode_t *
-MONO_FindNodeById(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
-                  MONO_NodeId_t id_);
+/// ***************************************** USER
 
 /**
- * @brief  找到合适的位置，将节点node_到队列中
+ * @brief 设置定时器运行状态
  *
- * timer_参数越小越靠近头节点 priority参数越小越靠近头节点
+ * 调用该API 队列可能不会立即停止工作
  *
- * @param  queue_:        队列指针
- * @param  node_:         节点指针
- * @return MONO_NodeId_t: 节点id
+ * @since v2.3
+ * @param status_ 状态
  */
-MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
-                            MONO_PriorityTimerNode_t *node_);
-
-/**
- * @brief 弹出队列中优先级最高的（第一个）节点
- * @param  queue_: 队列指针
- * @deprecated
- * @since v2.1
- * @return MONO_PriorityTimerNode_t*: 节点的指针
- */
-MONO_PriorityTimerNode_t *
-    MONO_PopNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
-
-/**
- * @brief 弹出指定id的节点
- * @param  queue_: 队列指针
- * @param  inner_: true为内部节点
- * @return MONO_PriorityTimerNode_t*: 节点指针
- */
-MONO_PriorityTimerNode_t *
-MONO_PopRunableNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, bool inner_);
+void MONO_SetTimerQueueEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                              bool status_);
 
 /**
  * @brief 增加定时器并 运行当前定时器周期数为零的所有节点中的函数
@@ -222,15 +207,15 @@ uint8_t MONO_Size(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 
 /**
  * @brief 设置指定节点的运行状态
- * 
- * 
- * 
- * @param id_ 
- * @param enable_ 
- * @return true 
- * @return false 
+ *
+ * @param queue_: 队列指针
+ * @param id_ 定时器队列任务启用状态
+ * @param enable_ 是否启用
+ * @return true 成功
+ * @return false 失败
  */
-bool MONO_SetTimerNodeEnable(MONO_NodeTimer_t id_, bool enable_);
+bool MONO_SetTimerNodeEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                             MONO_NodeTimer_t id_, bool enable_);
 
 /**
  * @brief 创建node以便加入到队列

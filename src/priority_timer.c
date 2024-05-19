@@ -43,53 +43,56 @@ void MONO_CopyNode(MONO_PriorityTimerNode_t *node_dest_,
   node_dest_->_args = node_src_->_args;
 }
 
-MONO_PriorityTimerNode_t *
-MONO_SetEnabled(uint8_t enabled_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
+// MONO_PriorityTimerNode_t *
+// MONO_SetEnabled(uint8_t enabled_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT)
+// {
 
-  node_->_enabled = enabled_;
-  return node_;
-}
+//   node_->_enabled = enabled_;
+//   return node_;
+// }
 
-MONO_PriorityTimerNode_t *
-MONO_SetTimer(MONO_NodeTimer_t timer_,
-              MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-  node_->_timer = timer_;
-  return node_;
-}
+// MONO_PriorityTimerNode_t *
+// MONO_SetTimer(MONO_NodeTimer_t timer_,
+//               MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
+//   node_->_timer = timer_;
+//   return node_;
+// }
 
-MONO_PriorityTimerNode_t *
-MONO_SetLoop(uint8_t loop_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-  node_->_loop = loop_;
-  // 若节点_loop_timer为0且_time不为0则设置_loop_timer的值为_timer的值
-  if (node_->_loop_timer == 0 && node_->_timer != 0) {
-    node_->_loop_timer = node_->_timer;
-  }
-  return node_;
-}
+// MONO_PriorityTimerNode_t *
+// MONO_SetLoop(uint8_t loop_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
+//   node_->_loop = loop_;
+//   // 若节点_loop_timer为0且_time不为0则设置_loop_timer的值为_timer的值
+//   if (node_->_loop_timer == 0 && node_->_timer != 0) {
+//     node_->_loop_timer = node_->_timer;
+//   }
+//   return node_;
+// }
 
-MONO_PriorityTimerNode_t *
-MONO_SetLoopTimer(MONO_NodeTimer_t loop_timer_,
-                  MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-  node_->_loop_timer = loop_timer_;
-  return node_;
-}
+// MONO_PriorityTimerNode_t *
+// MONO_SetLoopTimer(MONO_NodeTimer_t loop_timer_,
+//                   MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
+//   node_->_loop_timer = loop_timer_;
+//   return node_;
+// }
 
-MONO_PriorityTimerNode_t *
-MONO_SetPriority(uint8_t priority_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-  node_->_priority = priority_;
-  return node_;
-}
+// MONO_PriorityTimerNode_t *
+// MONO_SetPriority(uint8_t priority_,
+// MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
+//   node_->_priority = priority_;
+//   return node_;
+// }
 
-MONO_PriorityTimerNode_t *
-MONO_SetArgs(void *args_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-  node_->_args = args_;
-  return node_;
-}
+// MONO_PriorityTimerNode_t *
+// MONO_SetArgs(void *args_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
+//   node_->_args = args_;
+//   return node_;
+// }
 
-void MONO_RegisterResultPerformance(MONO_NodeFunction_t func_,
-                                    MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-  node_->_performance_func = func_;
-}
+// void MONO_RegisterResultPerformance(MONO_NodeFunction_t func_,
+//                                     MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT)
+//                                     {
+//   node_->_performance_func = func_;
+// }
 
 MONO_PriorityTimerNode_t *MONO_CreateQueueNodeFull(
     MONO_NodeFunction_t node_func_, uint8_t inner_, uint8_t enabled_,
@@ -168,9 +171,19 @@ MONO_UnlockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   queue_->_lock = false;
 }
 
+void MONO_SetTimerQueueEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                              bool status_) {
+  queue_->_run_status = status_;
+}
+
 MONO_PriorityTimerQueue_t *MONO_CreatePriorityQueue() {
   MONO_PriorityTimerQueue_t *queue = MONO_AllocTimerQueue();
   queue->_header_node = NULL;
+  queue->_disabled_header = NULL;
+  queue->_lock = false;
+  queue->_run_status = false;
+  queue->_size = 0;
+  queue->_timer_tick = 0;
 
   // #ifdef MONO_USE_FULL_PTQ_MEMBER
 
@@ -221,79 +234,60 @@ void MONO_DestroyPriorityQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   MONO_DeallocTimerQueue(queue_);
 }
 
-MONO_PriorityTimerNode_t *
-MONO_FindNodeById(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
-                  MONO_NodeId_t id_) {
-  if (queue_ == NULL || queue_->_size <= 0) {
-    return NULL;
+/**
+ * @brief  找到合适的位置，将节点node_到队列中
+ *
+ * timer_参数越小越靠近头节点 priority参数越小越靠近头节点
+ *
+ * @param  queue_:        队列指针
+ * @param  node_:         节点指针
+ * @return MONO_NodeId_t: 节点id
+ */
+static MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                                   MONO_PriorityTimerNode_t *node_) {
+
+  MONO_PriorityTimerNode_t **headerNode;
+  // 这里分是否为启用节点的情况
+  if (node_->_enabled) {
+    // 主队列
+    headerNode = &queue_->_header_node;
+  } else {
+    // 缓存队列
+    headerNode = &queue_->_disabled_header;
   }
-  MONO_PriorityTimerNode_t *tempNode = queue_->_header_node;
-  while (tempNode != NULL) {
-    if (tempNode->_id == id_) {
-      return tempNode;
-    }
-    tempNode = tempNode->_next;
-  }
-
-  return NULL;
-}
-
-MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
-                            MONO_PriorityTimerNode_t *node_) {
-  MONO_PriorityTimerNode_t *tempNode = queue_->_header_node;
-  MONO_PriorityTimerNode_t *prevNode = queue_->_header_node;
-
   // 没有头节点的情况
-  if (tempNode == NULL) {
-    queue_->_header_node = node_;
+  if ((*headerNode) == NULL) {
+    *headerNode = node_;
     queue_->_size = 1;
     return node_->_id;
   }
 
-  // TODO 优化节点Push
-  // 只有一个节点的情况
-  if (tempNode->_next == NULL) {
-    // 先比较执行时间
-    if ((node_->_timer < tempNode->_timer) ||   // 时间小于上一个节点
-        ((node_->_timer == tempNode->_timer) && // 时间等于上个节点并且
-         (node_->_priority < tempNode->_priority) // 优先级小于上个节点
-         )) {
-      // 插入到这个节点的前面
-      queue_->_header_node = node_;
-      node_->_next = tempNode;
-      tempNode->_next = NULL;
-    } else {
-      // 插入到这个节点的后面
-      tempNode->_next = node_;
-      node_->_next = NULL;
-    }
-    queue_->_size++;
-    return node_->_id;
-  }
-
-  prevNode = tempNode;
-  tempNode = tempNode->_next;
-  // 其他
+  MONO_PriorityTimerNode_t *tempNode = *headerNode;
+  MONO_PriorityTimerNode_t *prevNode = NULL;
+  // 非头节点情况
   // 首先查找到合适的timer位置
   while (tempNode != NULL) {
-
     if ((node_->_timer < tempNode->_timer) ||   // 时间小于这个节点
         ((node_->_timer == tempNode->_timer) && // 时间等于这个节点并且
          (node_->_priority < tempNode->_priority) // 优先级小于这个节点
          )) {
       // 插入到这个节点的前面
-
-      // 将上一个节点的下一个节点值设为要插入的这个节点
-      prevNode->_next = node_;
-      // 要插入这个节点的下一个节点值设置为当前几点值
-      node_->_next = tempNode;
-      break;
+      if (prevNode == NULL) {
+        // 插入到头节点
+        *headerNode = node_;
+        node_->_next = tempNode;
+      } else {
+        // 非头节点
+        node_->_next = prevNode->_next;
+        prevNode->_next = node_;
+      }
+      queue_->_size++;
+      return UINT16_MAX;
     }
 
     prevNode = tempNode;
     tempNode = tempNode->_next;
   }
-  queue_->_size++;
   return node_->_id;
 
   // #ifdef MONO_USE_FULL_PTN_MEMBER
@@ -318,19 +312,27 @@ static void MONO_TimerRunning(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   }
 }
 
-MONO_PriorityTimerNode_t *
+/**
+ * @brief 弹出队列中优先级最高的（第一个）节点
+ * @param  queue_: 队列指针
+ * @deprecated
+ * @since v2.1
+ * @return MONO_PriorityTimerNode_t*: 节点的指针
+ */
+static MONO_PriorityTimerNode_t *
 MONO_PopNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   (void)queue_;
   return NULL;
   // TODO 待实现
-  // #ifdef MONO_USE_FULL_PTQ_MEMBER
-  //   return queue_->EraseNodeByIndex(queue_, 0);
-  // #else
-  //   return MONO_EraseNodeByIndex(queue_, 0);
-  // #endif
 }
 
-MONO_PriorityTimerNode_t *
+/**
+ * @brief 弹出指定id的节点
+ * @param  queue_: 队列指针
+ * @param  inner_: true为内部节点
+ * @return MONO_PriorityTimerNode_t*: 节点指针
+ */
+static MONO_PriorityTimerNode_t *
 MONO_PopRunableNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, bool inner_) {
   if (queue_ == NULL) {
     return NULL;
@@ -344,12 +346,13 @@ MONO_PopRunableNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, bool inner_) {
   MONO_PriorityTimerNode_t *prevNode = NULL;
   while ((tempNode != NULL) && (tempNode->_timer == 0)) {
     // TODO 可以进一步优化判断条件
-    if ((tempNode->_inner == inner_) && (tempNode->_enabled)) {
+    if (tempNode->_inner == inner_) {
       if (prevNode != NULL) {
+        // 不为头节点
         prevNode->_next = tempNode->_next;
-      }
-      if (tempNode == queue_->_header_node) {
-        queue_->_header_node = NULL;
+      } else {
+        // 如果当前节点为头节点
+        queue_->_header_node = tempNode->_next;
       }
       queue_->_size--;
       return tempNode;
@@ -396,6 +399,10 @@ static bool MONO_RunNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
 }
 
 uint32_t MONO_TimerInnerHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
+  if (!queue_->_run_status) {
+    // 未开启
+    return 0;
+  }
   uint32_t resultCount = 0;
   // Lock
   if (!MONO_TryLockTimerQueue(queue_)) {
@@ -421,11 +428,16 @@ uint32_t MONO_TimerInnerHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
 }
 
 uint32_t MONO_TimerHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
-  uint32_t resultCount = 0;
+  if (!queue_->_run_status) {
+    // 未开启
+    return 0;
+  }
   // Lock
   if (!MONO_TryLockTimerQueue(queue_)) {
     return UINT32_MAX;
   }
+
+  uint32_t resultCount = 0;
 
   MONO_PriorityTimerNode_t *runableNode = NULL;
 
@@ -446,6 +458,133 @@ uint8_t MONO_Size(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   return queue_->_size;
 }
 
+/**
+ * @brief 使用函数指针找到队列中的节点
+ * @param  queue_: 队列指针
+ * @param  id_   : 节点id
+ */
+static MONO_PriorityTimerNode_t *
+MONO_FindNodeById(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                  MONO_NodeId_t id_) {
+  if (queue_ == NULL || queue_->_size <= 0) {
+    return NULL;
+  }
+  MONO_PriorityTimerNode_t *tempNode = queue_->_header_node;
+  while (tempNode != NULL) {
+    if (tempNode->_id == id_) {
+      if (!tempNode->_enabled) {
+        // 检查修正
+        tempNode->_enabled = true;
+      }
+      return tempNode;
+    }
+    tempNode = tempNode->_next;
+  }
+
+  tempNode = queue_->_disabled_header;
+  while (tempNode != NULL) {
+    if (tempNode->_id == id_) {
+      // 检查修正
+      if (tempNode->_enabled) {
+        tempNode->_enabled = false;
+      }
+      return tempNode;
+    }
+    tempNode = tempNode->_next;
+  }
+
+  return NULL;
+}
+
+/**
+ * @brief 弹出队列指定节点
+ *
+ * @param  queue_ 队列指针
+ * @param  id_    节点ID
+ * @return MONO_PriorityTimerNode_t*
+ */
+static MONO_PriorityTimerNode_t *
+MONO_PopNodeById(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                 MONO_NodeId_t id_) {
+  if (queue_ == NULL || queue_->_size <= 0) {
+    return NULL;
+  }
+
+  MONO_PriorityTimerNode_t *tempNode = queue_->_header_node;
+  MONO_PriorityTimerNode_t *prevNode = NULL;
+  while (tempNode != NULL) {
+    if (tempNode->_id == id_) {
+      // pop节点
+      if (prevNode != NULL) {
+        // 如果有上一个节点
+        prevNode->_next = tempNode->_next;
+      } else {
+        // 如果为头节点
+        queue_->_header_node = tempNode->_next;
+      }
+      queue_->_size--;
+      return tempNode;
+    }
+    prevNode = tempNode;
+    tempNode = tempNode->_next;
+  }
+
+  tempNode = queue_->_disabled_header;
+  prevNode = NULL;
+  while (tempNode != NULL) {
+    if (tempNode->_id == id_) {
+      // pop节点
+      if (prevNode != NULL) {
+        // 如果有上一个节点
+        prevNode->_next = tempNode->_next;
+      } else {
+        // 如果为头节点
+        queue_->_disabled_header = tempNode->_next;
+      }
+      queue_->_size--;
+      return tempNode;
+    }
+    prevNode = tempNode;
+    tempNode = tempNode->_next;
+  }
+
+  return NULL;
+}
+
+bool MONO_SetTimerNodeEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                             MONO_NodeTimer_t id_, bool enable_) {
+  // 跳过无效参数
+  if ((id_ == UINT32_MAX) || (id_ == 0)) {
+    return false;
+  }
+
+  // 开锁
+  if (!MONO_TryLockTimerQueue(queue_)) {
+    return false;
+  }
+
+  MONO_PriorityTimerNode_t *findNode = MONO_PopNodeById(queue_, id_);
+  if (findNode == NULL) {
+    return false;
+  }
+  // 判断是否不需要操作
+  if (findNode->_enabled == enable_) {
+    return true;
+  }
+
+  // 需要操作
+  MONO_PriorityTimerNode_t *popNode = MONO_PopNodeById(queue_, id_);
+  if (popNode == NULL) {
+    return false;
+  }
+  popNode->_enabled = enable_;
+  bool result = (MONO_PushNode(queue_, popNode) != UINT16_MAX);
+
+  // 解锁
+  MONO_UnlockTimerQueue(queue_);
+  return result;
+}
+
 uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                                     MONO_NodeFunction_t node_func_,
                                     uint8_t inner_, uint8_t enabled_,
@@ -454,7 +593,6 @@ uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                                     uint8_t priority_, void *args_,
                                     MONO_NodeFunction_t performance_func_) {
   MONO_PriorityTimerNode_t node = {
-
       // #ifdef MONO_USE_FULL_PTN_MEMBER
       //       .CopyNode = MONO_CopyNode,
       //       .DeallocNode = MONO_DeallocNode,
