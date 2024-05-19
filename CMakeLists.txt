@@ -26,7 +26,7 @@ target_link_libraries(${PROJECT_NAME} INTERFACE
 add_compile_definitions (
 )
 
-# add_subdirectory(test)
+add_subdirectory(test)
 
 # Validate that libmono code is compatible with C standard
 if(CMAKE_C_STANDARD LESS 11)

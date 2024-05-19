@@ -1,17 +1,14 @@
 /**
- * @file main.c
- * @brief
- * @author monoliths (monoliths-uni@outlook.com)
- * @version 1.0
- * @date 2022-01-02
- *
- * *********************************************************************************
- *
- * @note version:1.0
- * @description: identify
- *
- * *********************************************************************************
+ * @file test_for_c_main.c
+ * @author Diam (monoliths-uni@outlook.com)
+ * @brief 
+ * @version 2.2
+ * @date 2024-05-19
+ * 
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
+ * 
  */
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -54,40 +51,40 @@ void func_say_4() { printf("return: 4\n"); }
 //   }
 // }
 
-void timerRunningCount(int i_) {
-  for (size_t i = 0; i < i_; i++) {
-    MONO_TimerRunning(queue);
-    // timer_running();
-  }
+// void timerRunningCount(int i_) {
+//   for (size_t i = 0; i < i_; i++) {
+//     // MONO_TimerRunning(queue);
+//     // timer_running();
+//   }
 
-  printf("running ed: %d\n", i_);
-}
+//   printf("running ed: %d\n", i_);
+// }
 
 int main() {
-  queue = CreatePriorityTimerQueue();
+  // queue = CreatePriorityTimerQueue();
 
-  test_structure *ts;
+  // test_structure *ts;
 
-  ts = (test_structure *)calloc(1, sizeof(test_structure));
+  // ts = (test_structure *)calloc(1, sizeof(test_structure));
 
-  ts->a = 1;
-  ts->d = 29;
+  // ts->a = 1;
+  // ts->d = 29;
 
-  MONO_PushNodeRelease(queue, MONO_CreateQueueNode(func_say_1, 1, 0, ts));
-  MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_say_2, 1, 100, NULL));
-  MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t)func_say_3, 0, 50, NULL));
-  MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t)func_say_2, 0, 50, NULL));
-  MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t)func_say_2, 0, 53, NULL));
-  MONO_PushNodeRelease(queue, MONO_CreateQueueNode(func_say_1, 1, 54, NULL));
-  MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t)func_say_3, 1, 95, NULL));
+  // MONO_PushNodeRelease(queue, MONO_CreateQueueNode(func_say_1, 1, 0, ts));
+  // MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_say_2, 1, 100, NULL));
+  // MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t)func_say_3, 0, 50, NULL));
+  // MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t)func_say_2, 0, 50, NULL));
+  // MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t)func_say_2, 0, 53, NULL));
+  // MONO_PushNodeRelease(queue, MONO_CreateQueueNode(func_say_1, 1, 54, NULL));
+  // MONO_PushNodeRelease(queue, MONO_CreateQueueNode((MONO_NodeFunction_t)func_say_3, 1, 95, NULL));
 
-  timerRunningCount(50);
+  // timerRunningCount(50);
+  // // MONO_RunTimerNode(queue);
+  // timerRunningCount(200);
+  // // MONO_RunTimerNode(queue);
+
+  // timerRunningCount(200);
   // MONO_RunTimerNode(queue);
-  timerRunningCount(200);
-  // MONO_RunTimerNode(queue);
-
-  timerRunningCount(200);
-  MONO_RunTimerNode(queue);
   // MONO_RunInnerTimerNode(queue);
   // MONO_RunTimerNode(queue);
 
