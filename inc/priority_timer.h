@@ -9,7 +9,8 @@
  *
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
- * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
+ * reserved.
  *
  * *********************************************************************************
  *
@@ -43,6 +44,10 @@
  * @note version: 2.3
  * @description: 增加缓存队列来缓存关闭的节点
  * @date 2025-05-16
+ *
+ * @note version: 2.4
+ * @description: 添加了调试信息接口
+ * @date 2025-05-19
  *
  * *********************************************************************************
  */
@@ -184,6 +189,18 @@ void MONO_SetTimerQueueEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                               bool status_);
 
 /**
+ * @brief  找到合适的位置，将节点node_到队列中
+ *
+ * timer_参数越小越靠近头节点 priority参数越小越靠近头节点
+ *
+ * @param  queue_:        队列指针
+ * @param  node_:         节点指针
+ * @return MONO_NodeId_t: 节点id
+ */
+MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                            MONO_PriorityTimerNode_t *node_);
+
+/**
  * @brief 增加定时器并 运行当前定时器周期数为零的所有节点中的函数
  *
  * @param queue_: 队列指针
@@ -250,23 +267,15 @@ uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
  */
 uint32_t MONO_GetTimeTick(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 
-// TODO 增加debug选项
-// #ifdef MONO_PTQ_DEBUG
-// /**
-//  * @brief 格式化队列
-//  * @return char*:
-//  */
-// static const char*
-// MONO_GetQueueFormat(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT)
-// {
-//   if (queue_->size > 0)
-//   {
+#ifdef MONO_PTQ_DEBUG
+/**
+ * @brief 输出调试信息
+ * 
+ * @return uint32_t 
+ */
+void MONO_QueueTaskInfo(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 
-//   } else {
-//     return "empty";
-//   }
-// }
-// #endif
+#endif
 
 #ifdef __cplusplus
 }

@@ -2,12 +2,13 @@
  * @file priority_timer.c
  * @author Diam (monoliths-uni@outlook.com)
  * @brief
- * @version 2.3
+ * @version 2.4
  * @date 2024-05-16
  *
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
- * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
+ * reserved.
  */
 
 #include "priority_timer.h"
@@ -242,8 +243,8 @@ void MONO_DestroyPriorityQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
  * @param  node_:         节点指针
  * @return MONO_NodeId_t: 节点id
  */
-static MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
-                                   MONO_PriorityTimerNode_t *node_) {
+MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                            MONO_PriorityTimerNode_t *node_) {
 
   MONO_PriorityTimerNode_t **headerNode;
   // 这里分是否为启用节点的情况
@@ -257,7 +258,7 @@ static MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
   // 没有头节点的情况
   if ((*headerNode) == NULL) {
     *headerNode = node_;
-    queue_->_size = 1;
+    queue_->_size++;
     return node_->_id;
   }
 
@@ -283,12 +284,15 @@ static MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
         prevNode->_next = node_;
       }
       queue_->_size++;
-      return UINT16_MAX;
+      return node_->_id;
     }
 
     prevNode = tempNode;
     tempNode = tempNode->_next;
   }
+  prevNode->_next = node_;
+  node_->_next = NULL;
+  queue_->_size++;
   return node_->_id;
 
   // #ifdef MONO_USE_FULL_PTN_MEMBER
@@ -374,9 +378,9 @@ MONO_PopRunableNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, bool inner_) {
 static bool MONO_RunNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
   // 运行节点逻辑
   if (node_->_performance_func != NULL) {
-    node_->_performance_func(node_, node_->_func(node_, node_->_args));
+    node_->_performance_func(node_->_func(node_->_args));
   } else {
-    node_->_func(node_, node_->_args);
+    node_->_func(node_->_args);
   }
   // 检查是否需要reload
   // TODO 优化释放
@@ -564,7 +568,7 @@ bool MONO_SetTimerNodeEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
     return false;
   }
 
-  MONO_PriorityTimerNode_t *findNode = MONO_PopNodeById(queue_, id_);
+  MONO_PriorityTimerNode_t *findNode = MONO_FindNodeById(queue_, id_);
   if (findNode == NULL) {
     return false;
   }
@@ -626,3 +630,63 @@ uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
 uint32_t MONO_GetTimeTick(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   return queue_->_timer_tick;
 }
+
+#ifdef MONO_PTQ_DEBUG
+
+#include <stdio.h>
+static void PrintNodeHeader() {
+  printf("%-4s  %-7s  %-5s  %-4s  %-6s  %-6s \n", "id", "enabled", "timer",
+         "loop", "reload", "where");
+}
+static void PrintNode(MONO_PriorityTimerNode_t *temp_node_) {
+  printf("%-4d  %-7s  %-5d  %-4d  %-6d  %-6s \n", temp_node_->_id,
+         temp_node_->_enabled ? "true" : "false", temp_node_->_timer,
+         temp_node_->_loop, temp_node_->_loop_timer,
+         temp_node_->_inner ? "inner" : "outside");
+}
+
+void MONO_QueueTaskInfo(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
+  if (queue_ == NULL) {
+    printf("Error Queue NULL!\n");
+    return;
+  }
+
+  printf("\n");
+  printf("----------------  Task Info  -----------------\n");
+  printf("%-5s  %-6s  %-5s \n", "size", "status", "tick");
+  printf("%-5d  %-6s  %-5d \n", queue_->_size,
+         queue_->_run_status ? "run" : "stop", queue_->_timer_tick);
+  if (queue_->_size == 0) {
+    printf("Empty \n");
+    return;
+  }
+
+  int nowIndex = 0;
+
+  MONO_PriorityTimerNode_t *tempNode = NULL;
+  printf("\n");
+  printf("------------------- Major --------------------\n");
+  tempNode = queue_->_header_node;
+  while (tempNode != NULL) {
+    if (nowIndex == 0) {
+      PrintNodeHeader();
+      nowIndex++;
+    }
+    PrintNode(tempNode);
+    tempNode = tempNode->_next;
+  }
+  printf("\n");
+  printf("------------------- Cache --------------------\n");
+  tempNode = queue_->_disabled_header;
+  while (tempNode != NULL) {
+    if (nowIndex == 0) {
+      PrintNodeHeader();
+      nowIndex++;
+    }
+    PrintNode(tempNode);
+    tempNode = tempNode->_next;
+  }
+  printf("Empty \n");
+}
+
+#endif

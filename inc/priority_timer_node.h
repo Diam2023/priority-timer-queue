@@ -157,7 +157,7 @@ struct MONO_PriorityTimerNode_s {
   /**
    * @brief 定时执行的函数指针
    */
-  void *(*_func)(struct MONO_PriorityTimerNode_s *, void *);
+  void *(*_func)(void *);
 
   /**
    * @brief 如果不为零则为使能
@@ -199,7 +199,7 @@ struct MONO_PriorityTimerNode_s {
    * @sense: 1.1
    * @details 使用#register_result_performance函数将该属性添加到节点。
    */
-  void *(*_performance_func)(struct MONO_PriorityTimerNode_s *, void *);
+  void *(*_performance_func)(void *);
 
   /**
    * @brief 下一个节点
@@ -242,7 +242,7 @@ struct MONO_PriorityTimerNode_s {
 /**
  * @brief 节点函数类型的指针
  */
-typedef void *(*MONO_NodeFunction_t)(struct MONO_PriorityTimerNode_s *, void *);
+typedef void *(*MONO_NodeFunction_t)(void *);
 
 /**
  * @brief 定义类型
@@ -328,7 +328,8 @@ void MONO_CopyNode(MONO_PriorityTimerNode_t *node_dest_,
 //  * @return MONO_PriorityTimerNode_t* 返回操作的节点的指针
 //  */
 // MONO_PriorityTimerNode_t *
-// MONO_SetPriority(uint8_t priority_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
+// MONO_SetPriority(uint8_t priority_,
+// MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
 
 // /**
 //  * @brief 设置运行参数

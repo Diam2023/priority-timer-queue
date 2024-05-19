@@ -4,7 +4,7 @@ project(libmono_test VERSION 2.1)
 
 add_executable(${PROJECT_NAME} ./test_for_c_main.c)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE libmono)
+target_link_libraries(${PROJECT_NAME} PRIVATE libmono pthread)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ./inc)
 

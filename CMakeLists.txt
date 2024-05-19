@@ -26,7 +26,10 @@ target_link_libraries(${PROJECT_NAME} INTERFACE
 add_compile_definitions (
 )
 
-add_subdirectory(test)
+if(DEFINED LIB_MONO_TEST)
+    message(INFO "Build Test")
+    add_subdirectory(test)
+endif()
 
 # Validate that libmono code is compatible with C standard
 if(CMAKE_C_STANDARD LESS 11)
