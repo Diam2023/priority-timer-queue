@@ -634,7 +634,7 @@ static void PrintNodeHeader() {
          "loop", "reload", "where");
 }
 static void PrintNode(MONO_PriorityTimerNode_t *temp_node_) {
-  printf("%-4d  %-7s  %-5d  %-4d  %-6d  %-6s \n", temp_node_->_id,
+  printf("%-4d  %-7s  %-5ld  %-4d  %-6ld  %-6s \n", temp_node_->_id,
          temp_node_->_enabled ? "true" : "false", temp_node_->_timer,
          temp_node_->_loop, temp_node_->_loop_timer,
          temp_node_->_inner ? "inner" : "outside");
@@ -649,7 +649,7 @@ void MONO_QueueTaskInfo(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   printf("\n");
   printf("----------------  Task Info  -----------------\n");
   printf("%-5s  %-6s  %-5s \n", "size", "status", "tick");
-  printf("%-5d  %-6s  %-5d \n", queue_->_size,
+  printf("%-5ld  %-6s  %-5ld \n", queue_->_size,
          queue_->_run_status ? "run" : "stop", queue_->_timer_tick);
   if (queue_->_size == 0) {
     printf("Empty \n");
