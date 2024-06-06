@@ -9,7 +9,8 @@
  *
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
- * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
+ * reserved.
  *
  * *********************************************************************************
  *
@@ -47,6 +48,10 @@
  * @note version: 2.4
  * @description: 添加了调试信息接口
  * @date 2025-05-19
+ *
+ * @note version: 2.5
+ * @description: 整理API 新增Timer设置API
+ * @date 2025-06-06
  *
  * *********************************************************************************
  */
@@ -102,35 +107,6 @@ typedef struct MONO_PriorityTimerQueue_s {
    */
   volatile bool _lock;
 
-  // #ifdef MONO_USE_FULL_PTQ_MEMBER
-  //   void (*IncreaseNodes)(struct MONO_PriorityTimerQueue *);
-  //   void (*DeallocateQueueMemory)(struct MONO_PriorityTimerQueue *);
-  //   void (*RankTimer)(struct MONO_PriorityTimerQueue *);
-  //   MONO_PriorityTimerNode_t *(*FindNodeById)(struct MONO_PriorityTimerQueue
-  //   *,
-  //                                             uint16_t);
-  //   uint16_t (*PushNode)(struct MONO_PriorityTimerQueue *,
-  //                        MONO_PriorityTimerNode_t *);
-  //   uint16_t (*PushNodeRelease)(struct MONO_PriorityTimerQueue *,
-  //                               MONO_PriorityTimerNode_t *);
-  //   void (*TimerRunning)(struct MONO_PriorityTimerQueue *);
-  //   MONO_PriorityTimerNode_t *(*PopNode)(struct MONO_PriorityTimerQueue *);
-  //   MONO_PriorityTimerNode_t *(*PopNodeById)(struct MONO_PriorityTimerQueue
-  //   *,
-  //                                            uint16_t);
-  //   MONO_PriorityTimerNode_t *(*EraseNode)(struct MONO_PriorityTimerQueue *,
-  //                                          MONO_PriorityTimerNode_t *);
-  //   MONO_PriorityTimerNode_t *(*EraseNodeByIndex)(
-  //       struct MONO_PriorityTimerQueue *, uint32_t);
-  //   void (*RunTimerNode)(struct MONO_PriorityTimerQueue *);
-  //   void (*RunInnerTimerNode)(struct MONO_PriorityTimerQueue *);
-  //   uint8_t (*Size)(struct MONO_PriorityTimerQueue *);
-  //   uint16_t (*PushNodeFullArguments)(struct MONO_PriorityTimerQueue *,
-  //                                     MONO_NodeFunction_t, uint8_t, uint8_t,
-  //                                     MONO_NodeTimer_t, uint8_t,
-  //                                     MONO_NodeTimer_t, uint8_t, void *,
-  //                                     MONO_NodeFunction_t);
-  // #endif
 } MONO_PriorityTimerQueue_t;
 
 /// ***************************************** CORE
@@ -242,6 +218,46 @@ bool MONO_SetTimerNodeEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                              MONO_NodeTimer_t id_, bool enable_);
 
 /**
+ * @brief 设置指定节点下次运行时间
+ *
+ * @since 2.5
+ * @param queue_: 队列指针
+ * @param id_ 定时器队列任务启用状态
+ * @param timer_ 时间
+ * @return true 成功
+ * @return false 失败
+ */
+bool MONO_SetTimerNodeTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                            MONO_NodeTimer_t id_,
+                            const MONO_NodeTimer_t timer_);
+
+/**
+ * @brief 设置节点运行循环时间
+ *
+ * @since 2.5
+ * @param queue_: 队列指针
+ * @param id_ 定时器队列任务启用状态
+ * @param timer_ 时间
+ * @return true 成功
+ * @return false 失败
+ */
+bool MONO_SetTimerNodeLoopTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                                MONO_NodeTimer_t id_,
+                                const MONO_NodeTimer_t timer_);
+
+/**
+ * @brief 节点是否存在于队列中
+ *
+ * @since 2.5
+ * @param queue_: 队列指针
+ * @param id_ 定时器队列任务启用状态
+ * @return true 成功
+ * @return false 失败
+ */
+bool MONO_IsTimerNodeExist(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                           MONO_NodeTimer_t id_);
+
+/**
  * @brief 创建node以便加入到队列
  * @param  queue_           队列指针
  * @param  node_func_       节点函数指针
@@ -278,8 +294,8 @@ uint32_t MONO_GetTimeTick(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 #ifdef MONO_PTQ_DEBUG
 /**
  * @brief 输出调试信息
- * 
- * @return uint32_t 
+ *
+ * @return uint32_t
  */
 void MONO_QueueTaskInfo(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 

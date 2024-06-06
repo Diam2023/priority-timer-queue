@@ -9,12 +9,17 @@
  *
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
- * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
+ * reserved.
  *
  * @note version: 2.2
  * @description: 更改队列实现方式为链表 并预留用户分配空间接口
  * @date 2025-05-16
  *
+ * @note version: 2.5
+ * @description: 移除了PTN选项
+ * @date 2025-06-06
+ * 
  * *********************************************************************************
  */
 
@@ -25,10 +30,10 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 /**
  * @brief 数据初始长度
@@ -81,7 +86,6 @@ extern "C" {
   MONO_CreateQueueNodeFull(f_, i_, 1, t_, c_, t_, UINT8_MAX, v_, NULL)
 
 // -----> Basic Type
-
 
 // -----> Node Type
 
@@ -163,37 +167,6 @@ struct MONO_PriorityTimerNode_s {
    */
   struct MONO_PriorityTimerNode_s *_next;
 
-  // #ifdef MONO_USE_FULL_PTN_MEMBER
-
-  //   void (*ExecuteNode)(struct MONO_PriorityTimerNode_t *);
-
-  //   // 指向销毁节点函数的函数指针
-  //   void (*DeallocNode)(struct MONO_PriorityTimerNode_t *);
-
-  //   void (*CopyNode)(struct MONO_PriorityTimerNode_t *,
-  //                    struct MONO_PriorityTimerNode_t *);
-
-  //   void (*RegisterResultPerformance)(MONO_NodeFunction_t,
-  //                                     struct MONO_PriorityTimerNode_t *);
-
-  //   struct MONO_PriorityTimerNode_t *(*SetEnabled)(
-  //       uint8_t, struct MONO_PriorityTimerNode_t *);
-  //   struct MONO_PriorityTimerNode_t *(*SetTimer)(
-  //       MONO_NodeTimer_t, struct MONO_PriorityTimerNode_t *);
-  //   struct MONO_PriorityTimerNode_t *(*SetLoop)(
-  //       uint8_t, struct MONO_PriorityTimerNode_t *);
-  //   struct MONO_PriorityTimerNode_t *(*SetLoopTimer)(
-  //       MONO_NodeTimer_t, struct MONO_PriorityTimerNode_t *);
-
-  //   struct MONO_PriorityTimerNode_t *(*SetPriority)(
-  //       uint8_t, struct MONO_PriorityTimerNode_t *);
-  //   struct MONO_PriorityTimerNode_t *(*SetArgs)(
-  //       void *, struct MONO_PriorityTimerNode_t *);
-  //   // struct MONO_PriorityTimerNode_t*
-  //   // (*RegisterResultPerformance)(MONO_NodeFunction_t, struct
-  //   // MONO_PriorityTimerNode_t *);
-  // #endif
-
 } __attribute__((aligned(4)));
 
 /**
@@ -237,65 +210,6 @@ void MONO_DeallocNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
  */
 void MONO_CopyNode(MONO_PriorityTimerNode_t *node_dest_,
                    const MONO_PriorityTimerNode_t *const node_src_);
-
-// /**
-//  * @brief 设置node_是否启用
-//  * @param  enabled_         若为0则不启用，1为启用
-//  * @param  node_            节点的指针
-//  * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
-//  */
-// MONO_PriorityTimerNode_t *
-// MONO_SetEnabled(uint8_t enabled_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
-
-// /**
-//  * @brief 设置当次定时时间
-//  * @param  timer_           timer_ MONO_NodeTimer_t类型的值
-//  * @param  node_            节点的指针
-//  * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
-//  */
-// MONO_PriorityTimerNode_t *
-// MONO_SetTimer(MONO_NodeTimer_t timer_,
-//               MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
-
-// /**
-//  * @brief 设置重载次数
-//  * @param  loop_            设置循环次数，0为关闭循环 UINT8_MAX为无限循环
-//  *                          若节点_loop_timer为0且_time不为0
-//  *                          则设置_loop_timer的值为_timer的值
-//  * @param  node_            节点的指针
-//  * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
-//  */
-// MONO_PriorityTimerNode_t *
-// MONO_SetLoop(uint8_t loop_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
-
-// /**
-//  * @brief 设置重载定时时间
-//  * @param  loop_timer_      timer_ MONO_NodeTimer_t类型的值
-//  * @param  node_            节点的指针
-//  * @return MONO_PriorityTimerNode_t* 返回操作节点的指针
-//  */
-// MONO_PriorityTimerNode_t *
-// MONO_SetLoopTimer(MONO_NodeTimer_t loop_timer_,
-//                   MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
-
-// /**
-//  * @brief 设置优先级
-//  * @param  priority_        0的优先最高
-//  * @param  node_            节点的指针
-//  * @return MONO_PriorityTimerNode_t* 返回操作的节点的指针
-//  */
-// MONO_PriorityTimerNode_t *
-// MONO_SetPriority(uint8_t priority_,
-// MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
-
-// /**
-//  * @brief 设置运行参数
-//  * @param  args_             节点函数的参数
-//  * @param  node_            节点的指针
-//  * @return MONO_PriorityTimerNode_t* 返回操作的节点的指针
-//  */
-// MONO_PriorityTimerNode_t *
-// MONO_SetArgs(void *args_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT);
 
 /**
  * @brief 注册一个处理节点运行后返回值的函数.

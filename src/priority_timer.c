@@ -5,6 +5,9 @@
  * @version 2.4
  * @date 2024-05-16
  *
+ * @note version: 2.5
+ * @description: 整理API
+ * @date 2025-06-06
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
  * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
@@ -43,57 +46,6 @@ void MONO_CopyNode(MONO_PriorityTimerNode_t *node_dest_,
   node_dest_->_args = node_src_->_args;
 }
 
-// MONO_PriorityTimerNode_t *
-// MONO_SetEnabled(uint8_t enabled_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT)
-// {
-
-//   node_->_enabled = enabled_;
-//   return node_;
-// }
-
-// MONO_PriorityTimerNode_t *
-// MONO_SetTimer(MONO_NodeTimer_t timer_,
-//               MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-//   node_->_timer = timer_;
-//   return node_;
-// }
-
-// MONO_PriorityTimerNode_t *
-// MONO_SetLoop(uint8_t loop_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-//   node_->_loop = loop_;
-//   // 若节点_loop_timer为0且_time不为0则设置_loop_timer的值为_timer的值
-//   if (node_->_loop_timer == 0 && node_->_timer != 0) {
-//     node_->_loop_timer = node_->_timer;
-//   }
-//   return node_;
-// }
-
-// MONO_PriorityTimerNode_t *
-// MONO_SetLoopTimer(MONO_NodeTimer_t loop_timer_,
-//                   MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-//   node_->_loop_timer = loop_timer_;
-//   return node_;
-// }
-
-// MONO_PriorityTimerNode_t *
-// MONO_SetPriority(uint8_t priority_,
-// MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-//   node_->_priority = priority_;
-//   return node_;
-// }
-
-// MONO_PriorityTimerNode_t *
-// MONO_SetArgs(void *args_, MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
-//   node_->_args = args_;
-//   return node_;
-// }
-
-// void MONO_RegisterResultPerformance(MONO_NodeFunction_t func_,
-//                                     MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT)
-//                                     {
-//   node_->_performance_func = func_;
-// }
-
 MONO_PriorityTimerNode_t *MONO_CreateQueueNodeFull(
     MONO_NodeFunction_t node_func_, uint8_t inner_, uint8_t enabled_,
     MONO_NodeTimer_t timer_, uint8_t loop_, MONO_NodeTimer_t loop_timer_,
@@ -122,26 +74,6 @@ MONO_PriorityTimerNode_t *MONO_CreateQueueNodeFull(
 
   node->_next = NULL;
 
-  // #ifdef MONO_USE_FULL_PTN_MEMBER
-
-  //   // 注册函数指针
-
-  //   node->ExecuteNode = &MONO_ExecuteNode;
-
-  //   node->DeallocNode = &MONO_DeallocNode;
-
-  //   node->CopyNode = &MONO_CopyNode;
-
-  //   node->RegisterResultPerformance = &MONO_RegisterResultPerformance;
-
-  //   node->SetEnabled = &MONO_SetEnabled;
-  //   node->SetTimer = &MONO_SetTimer;
-  //   node->SetPriority = &MONO_SetPriority;
-  //   node->SetLoop = &MONO_SetLoop;
-  //   node->SetLoopTimer = &MONO_SetLoopTimer;
-  //   node->SetArgs = &MONO_SetArgs;
-
-  // #endif
   return node;
 }
 
@@ -185,25 +117,6 @@ MONO_PriorityTimerQueue_t *MONO_CreatePriorityQueue() {
   queue->_size = 0;
   queue->_timer_tick = 0;
 
-  // #ifdef MONO_USE_FULL_PTQ_MEMBER
-
-  //   queue->IncreaseNodes = &MONO_IncreaseNodes;
-  //   queue->DeallocateQueueMemory = &MONO_DeallocateQueueMemory;
-  //   queue->RankTimer = &MONO_RankTimer;
-  //   queue->FindNodeById = &MONO_FindNodeById;
-  //   queue->PushNode = &MONO_PushNode;
-  //   queue->PushNodeRelease = &MONO_PushNodeRelease;
-  //   queue->TimerRunning = &MONO_TimerRunning;
-  //   queue->PopNode = &MONO_PopNode;
-  //   queue->PopNodeById = &MONO_PopNodeById;
-  //   queue->EraseNode = &MONO_EraseNode;
-  //   queue->RunTimerNode = &MONO_RunTimerNode;
-  //   queue->RunInnerTimerNode = &MONO_RunInnerTimerNode;
-  //   queue->Size = &MONO_Size;
-  //   queue->EraseNodeByIndex = &MONO_EraseNodeByIndex;
-  //   queue->PushNodeFullArguments = &MONO_PushNodeFullArguments;
-
-  // #endif
   return queue;
 }
 
@@ -294,14 +207,6 @@ MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
   node_->_next = NULL;
   queue_->_size++;
   return node_->_id;
-
-  // #ifdef MONO_USE_FULL_PTN_MEMBER
-  //   node_->CopyNode((queue_->nodes + queue_->size), node_);
-  //   queue_->size++;
-  // #else
-  //   MONO_CopyNode((queue_->nodes + queue_->size), node_);
-  //   queue_->size++;
-  // #endif
 }
 
 static void MONO_TimerRunning(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
@@ -316,20 +221,6 @@ static void MONO_TimerRunning(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
     tempNode = tempNode->_next;
   }
 }
-
-// /**
-//  * @brief 弹出队列中优先级最高的（第一个）节点
-//  * @param  queue_: 队列指针
-//  * @deprecated
-//  * @since v2.1
-//  * @return MONO_PriorityTimerNode_t*: 节点的指针
-//  */
-// static MONO_PriorityTimerNode_t *
-// MONO_PopNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
-//   (void)queue_;
-//   return NULL;
-//   // TODO 待实现
-// }
 
 /**
  * @brief 弹出指定id的节点
@@ -585,6 +476,37 @@ bool MONO_SetTimerNodeEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
   return result;
 }
 
+bool MONO_SetTimerNodeTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                            MONO_NodeTimer_t id_,
+                            const MONO_NodeTimer_t timer_) {
+  MONO_PriorityTimerNode_t *node = MONO_FindNodeById(queue_, id_);
+
+  if (node != NULL) {
+    node->_timer = timer_;
+    return true;
+  }
+
+  return false;
+}
+
+bool MONO_SetTimerNodeLoopTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                                MONO_NodeTimer_t id_,
+                                const MONO_NodeTimer_t timer_) {
+  MONO_PriorityTimerNode_t *node = MONO_FindNodeById(queue_, id_);
+
+  if (node != NULL) {
+    node->_loop_timer = timer_;
+    return true;
+  }
+
+  return false;
+}
+
+bool MONO_IsTimerNodeExist(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                           MONO_NodeTimer_t id_) {
+  return !(MONO_FindNodeById(queue_, id_) == NULL);
+}
+
 uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                                     MONO_NodeFunction_t node_func_,
                                     uint8_t inner_, uint8_t enabled_,
@@ -592,34 +514,21 @@ uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                                     MONO_NodeTimer_t loop_timer_,
                                     uint8_t priority_, void *args_,
                                     MONO_NodeFunction_t performance_func_) {
-  MONO_PriorityTimerNode_t node = {
-      // #ifdef MONO_USE_FULL_PTN_MEMBER
-      //       .CopyNode = MONO_CopyNode,
-      //       .DeallocNode = MONO_DeallocNode,
-      //       .ExecuteNode = MONO_ExecuteNode,
-      //       .RegisterResultPerformance = MONO_RegisterResultPerformance,
-      // #endif
-      ._args = args_,
-      ._enabled = enabled_,
-      ._func = node_func_,
-      ._id = MONO_g_ptn_auto_id++,
-      ._inner = inner_,
-      ._loop = loop_,
-      ._loop_timer = loop_timer_,
-      ._performance_func = performance_func_,
-      ._priority = priority_,
-      ._timer = timer_};
+  MONO_PriorityTimerNode_t node = {._args = args_,
+                                   ._enabled = enabled_,
+                                   ._func = node_func_,
+                                   ._id = MONO_g_ptn_auto_id++,
+                                   ._inner = inner_,
+                                   ._loop = loop_,
+                                   ._loop_timer = loop_timer_,
+                                   ._performance_func = performance_func_,
+                                   ._priority = priority_,
+                                   ._timer = timer_};
 
   MONO_PriorityTimerNode_t *newNode = MONO_AllocNode();
   MONO_CopyNode(newNode, &node);
 
   return MONO_PushNode(queue_, newNode);
-
-  // #ifdef MONO_USE_FULL_PTQ_MEMBER
-  //   return queue_->PushNode(queue_, &node);
-  // #else
-  //   return MONO_PushNode(queue_, &node);
-  // #endif
 }
 
 uint32_t MONO_GetTimeTick(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
