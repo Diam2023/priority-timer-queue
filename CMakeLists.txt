@@ -3,10 +3,9 @@ cmake_minimum_required(VERSION 3.16.3)
 project(libmono VERSION 2.1)
 add_library(${PROJECT_NAME} INTERFACE)
 
+add_subdirectory(test)
+
 target_compile_definitions(${PROJECT_NAME} INTERFACE
-    # MONO_USE_FULL_PTQ_MEMBER
-    # MONO_USE_FULL_PTN_MEMBER
-    # MONO_PTQ_DEBUG
 )
 
 target_include_directories(${PROJECT_NAME} INTERFACE
