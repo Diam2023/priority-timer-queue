@@ -144,6 +144,19 @@ void MONO_DestroyPriorityQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
     }
   }
 
+  tempNode = queue_->_disabled_header;
+  nextNode = NULL;
+  while (tempNode != NULL) {
+    if (tempNode->_next != NULL) {
+      nextNode = tempNode->_next;
+      MONO_DeallocNode(tempNode);
+      tempNode = nextNode;
+    } else {
+      MONO_DeallocNode(tempNode);
+      tempNode = NULL;
+    }
+  }
+
   MONO_DeallocTimerQueue(queue_);
 }
 

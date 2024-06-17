@@ -9,3 +9,5 @@
 .history/
 
 build
+
+.cache
