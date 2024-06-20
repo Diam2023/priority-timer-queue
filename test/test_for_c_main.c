@@ -96,19 +96,19 @@ SetNextAlarmTimer {
 void *test(void *arg) {
   printf("Test Start \n");
 
-  NewTimerTask(queue, (MONO_NodeFunction_t) func_3, 2000, NULL);
+  NewTimerTask(queue, func_3, 2000, NULL);
 
   // 清空队列
   ClearTimerQueue(queue);
 
   testTaskId1 = NewTimerTask(queue, func_1, 1000, NULL);
-  testTaskId2 = NewTimerTask(queue, (MONO_NodeFunction_t) func_2, 1400, NULL);
-  testTaskId3 = NewTimerTask(queue, (MONO_NodeFunction_t) func_3, 1123, NULL);
+  testTaskId2 = NewTimerTask(queue, func_2, 1400, NULL);
+  testTaskId3 = NewTimerTask(queue, func_3, 1123, NULL);
   ClearTimerQueue(queue);
 
-  testTaskId1 = NewTimerTask(queue, (MONO_NodeFunction_t) func_1, 1000, NULL);
-  testTaskId2 = NewTimerTask(queue, (MONO_NodeFunction_t) func_2, 1400, NULL);
-  testTaskId3 = NewTimerTask(queue, (MONO_NodeFunction_t) func_3, 1123, NULL);
+  testTaskId1 = NewTimerTask(queue, func_1, 1000, NULL);
+  testTaskId2 = NewTimerTask(queue, func_2, 1400, NULL);
+  testTaskId3 = NewTimerTask(queue, func_3, 1123, NULL);
 
   DisableTimerTask(queue, testTaskId2);
   MONO_QueueTaskInfo(queue);
