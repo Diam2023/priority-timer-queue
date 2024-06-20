@@ -70,27 +70,35 @@ extern "C" {
 // 创建一个只运行一次且默认优先级的定时node
 
 /**
- * @brief 创建一个默认优先级的定时node
- * @param  f_            节点函数指针
- * @param  i_            若为0则在中断函数外部执行
- * @param  t_            定时器周期数
- * @param  v_            等待执行函数的参数
+ * @brief 创建一个默认优先级且一直运行的定时node
+ * @param  function       节点函数指针
+ * @param  timer          定时器周期数
+ * @param  arg            等待执行函数的参数
  * @return MONO_PriorityTimerNode_t* 返回创建的指针
  */
-#define MONO_CreateQueueNode(f_, i_, t_, v_) \
-  MONO_CreateQueueNodeFull(f_, i_, 1, t_, 0, t_, UINT8_MAX, v_, NULL)
+#define MONO_CreateQueueNode(function, timer, arg) \
+  MONO_CreateQueueNodeFull(function, true, timer, UINT8_MAX, timer, UINT8_MAX, arg, NULL)
+
+/**
+ * @brief 创建一个默认优先级且只运行一次的定时node
+ * @param  function       节点函数指针
+ * @param  timer          定时器周期数
+ * @param  arg            等待执行函数的参数
+ * @return MONO_PriorityTimerNode_t* 返回创建的指针
+ */
+#define MONO_CreateQueueNodeOnce(function, timer, arg) \
+  MONO_CreateQueueNodeFull(function, true, timer, 0, timer, UINT8_MAX, arg, NULL)
 
 /**
  * @brief 创建一个运行指定次数的Node
  * @param  f_            节点函数指针
- * @param  i_            若为0则在中断函数外部执行
  * @param  t_            定时器周期数
  * @param  c_            循环次数 UINT8_MAX则无限循环
  * @param  v_            等待执行函数的参数
  * @return MONO_PriorityTimerNode_t* 返回创建的指针
  */
-#define MONO_CreateQueueNodeCount(f_, i_, t_, c_, v_) \
-  MONO_CreateQueueNodeFull(f_, i_, 1, t_, c_, t_, UINT8_MAX, v_, NULL)
+#define MONO_CreateQueueNodeCount(f_, t_, c_, v_) \
+  MONO_CreateQueueNodeFull(f_, true, t_, c_, t_, UINT8_MAX, v_, NULL)
 
 // -----> Basic Type
 
@@ -233,7 +241,7 @@ void MONO_RegisterResultPerformance(MONO_NodeFunction_t func_,
  * 返回创建好的MONO_PriorityTimerNode_t类型的指针。
  */
 MONO_PriorityTimerNode_t *MONO_CreateQueueNodeFull(
-        MONO_NodeFunction_t node_func_, uint8_t inner_, uint8_t enabled_,
+        MONO_NodeFunction_t node_func_, uint8_t enabled_,
         MONO_NodeTimer_t timer_, uint8_t loop_counter_, MONO_NodeTimer_t reload_,
         uint8_t priority_, void *args_, MONO_NodeFunction_t performance_func_);
 
