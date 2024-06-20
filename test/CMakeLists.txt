@@ -9,8 +9,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE libmono pthread)
 target_include_directories(${PROJECT_NAME} PRIVATE ./inc)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    MONO_USE_FULL_PTQ_MEMBER
-    MONO_USE_FULL_PTN_MEMBER
     MONO_PTQ_DEBUG
 )
 
