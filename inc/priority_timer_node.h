@@ -4,13 +4,14 @@
  * @brief 节点结构
  *
  * @author Diam (monoliths-uni@outlook.com)
- * @version 2.4
- * @date 2024-05-15
+ * @version 3.0
+ * @date 2024-06-13
  *
  *
  * @copyright Copyright (c) 2022-2023 Diam. All rights reserved.
- * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights
- * reserved.
+ * @copyright Copyright (c) 2024-2025 桦鸿科技（重庆）有限公司. All rights reserved.
+ *
+ * *********************************************************************************
  *
  * @note version: 2.2
  * @description: 更改队列实现方式为链表 并预留用户分配空间接口
@@ -19,7 +20,13 @@
  * @note version: 2.5
  * @description: 移除了PTN选项
  * @date 2025-06-06
- * 
+ *
+ * @note version: 3.0
+ * @description: 修改了部分参数变量名字 以及移除了 inner选项
+ * * @details loop_timer -> reload
+ * * @details loop -> loop_counter
+ * @date 2025-06-13
+ *
  * *********************************************************************************
  */
 
@@ -38,18 +45,18 @@ extern "C" {
 /**
  * @brief 数据初始长度
  */
-#define MONO_DEFAULT_LENGTH 10
+#define MONO_DEFAULT_LENGTH             10
 
 /**
  * @brief 设置数据增长步长
  */
 #define MONO_DEFAULT_INCREASED_CAPACITY 10
 
-#define MONO_TOP_NODE_INDEX 0
-#define MONO_DEFAULT_SIZE_ZERO 0
+#define MONO_TOP_NODE_INDEX             0
+#define MONO_DEFAULT_SIZE_ZERO          0
 
-#define MONO_NODE_SIZE sizeof(MONO_PriorityTimerNode_t)
-#define ARGS_SIZE(args__) sizeof(*args__)
+#define MONO_NODE_SIZE                  sizeof(MONO_PriorityTimerNode_t)
+#define ARGS_SIZE(args__)               sizeof(*args__)
 
 #ifndef UINT8_MAX
 #define UINT8_MAX (255)
@@ -57,33 +64,41 @@ extern "C" {
 
 #define MONO_QUEUE_TIMER_TYPE_MAX UINT32_MAX
 
-#define MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT                              \
+#define MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT \
   MONO_PriorityTimerNode_t *node_
 
 // 创建一个只运行一次且默认优先级的定时node
 
 /**
- * @brief 创建一个默认优先级的定时node
- * @param  f_            节点函数指针
- * @param  i_            若为0则在中断函数外部执行
- * @param  t_            定时器周期数
- * @param  v_            等待执行函数的参数
+ * @brief 创建一个默认优先级且一直运行的定时node
+ * @param  function       节点函数指针
+ * @param  timer          定时器周期数
+ * @param  arg            等待执行函数的参数
  * @return MONO_PriorityTimerNode_t* 返回创建的指针
  */
-#define MONO_CreateQueueNode(f_, i_, t_, v_)                                   \
-  MONO_CreateQueueNodeFull(f_, i_, 1, t_, 0, t_, UINT8_MAX, v_, NULL)
+#define MONO_CreateQueueNode(function, timer, arg) \
+  MONO_CreateQueueNodeFull(function, true, timer, UINT8_MAX, timer, UINT8_MAX, arg, NULL)
+
+/**
+ * @brief 创建一个默认优先级且只运行一次的定时node
+ * @param  function       节点函数指针
+ * @param  timer          定时器周期数
+ * @param  arg            等待执行函数的参数
+ * @return MONO_PriorityTimerNode_t* 返回创建的指针
+ */
+#define MONO_CreateQueueNodeOnce(function, timer, arg) \
+  MONO_CreateQueueNodeFull(function, true, timer, 0, timer, UINT8_MAX, arg, NULL)
 
 /**
  * @brief 创建一个运行指定次数的Node
  * @param  f_            节点函数指针
- * @param  i_            若为0则在中断函数外部执行
  * @param  t_            定时器周期数
  * @param  c_            循环次数 UINT8_MAX则无限循环
  * @param  v_            等待执行函数的参数
  * @return MONO_PriorityTimerNode_t* 返回创建的指针
  */
-#define MONO_CreateQueueNodeCount(f_, i_, t_, c_, v_)                          \
-  MONO_CreateQueueNodeFull(f_, i_, 1, t_, c_, t_, UINT8_MAX, v_, NULL)
+#define MONO_CreateQueueNodeCount(f_, t_, c_, v_) \
+  MONO_CreateQueueNodeFull(f_, true, t_, c_, t_, UINT8_MAX, v_, NULL)
 
 // -----> Basic Type
 
@@ -111,34 +126,33 @@ struct MONO_PriorityTimerNode_s {
   MONO_NodeId_t _id;
 
   /**
-   * @brief 等待timer个时钟周期后执行_function
-   */
-  MONO_NodeTimer_t _timer; // sizeof 8
-
-  /**
    * @brief 定时执行的函数指针
    */
   void *(*_func)(void *);
 
   /**
+   * @brief 等待timer个时钟周期后执行_function
+   *
+   * sizeof 8
+   */
+  MONO_NodeTimer_t _timer;
+
+  /**
    * @brief 如果不为零则为使能
    *
-   * 截止v2.2版本，该成员即使为false也会参与队列排序，但不运行
    */
   bool _enabled;
 
   /**
-   * @brief 该值为循环次数，如果为0则不循环
-   * 循环计数是否启用取决于_count_loop的值时候不为0
-   * 当_loop为uint8最大值时无限循环
+   * @brief 该值为循环次数，如果为0则只运行一次
+   * 当_loop_counter为uint8最大值时无限循环
    */
-  uint8_t _loop;
+  uint8_t _loop_counter;
 
   /**
-   * @brief
-   * 如果_loop为不为0且_count_loop不为零，则_loop_timer为下一次循环的初始等待周期数
+   * @brief _reload为任务重载时间
    */
-  MONO_NodeTimer_t _loop_timer;
+  MONO_NodeTimer_t _reload;
 
   /**
    * @brief 定实执行函数的参数
@@ -151,14 +165,7 @@ struct MONO_PriorityTimerNode_s {
   uint8_t _priority;
 
   /**
-   * @brief 如果为true则在中断内部执行
-   */
-  bool _inner;
-
-  /**
-   * @brief 注册的结果指针处理函数
-   * @sense: 1.1
-   * @details 使用#register_result_performance函数将该属性添加到节点。
+   * @brief 注册的结果处理函数回调
    */
   void *(*_performance_func)(void *);
 
@@ -179,7 +186,6 @@ typedef void *(*MONO_NodeFunction_t)(void *);
  */
 typedef struct MONO_PriorityTimerNode_s MONO_PriorityTimerNode_t;
 
-// TODO: 增加选择是否释放节点选项
 /**
  * @brief 运行节点中的回调函数以及结果处理回调
  * @param node_: 节点指针
@@ -223,25 +229,24 @@ void MONO_RegisterResultPerformance(MONO_NodeFunction_t func_,
 /**
  * @brief 创建node以便加入到队列
  * @param  node_func_           节点函数指针
- * @param  inner_               0为异步执行，即在调用run_timer_node()函数时执行
  * @param  enabled_             0为关闭节点执行会跳过排序
  * @param  timer_               经过timer_个时钟周期后执行
- * @param  loop_ 如果启用计数循环，则该参数为第一次运行后循环运行的次数
+ * @param  loop_counter_        如果启用计数循环，则该参数为第一次运行后循环运行的次数
  *                              0为不循环，UINT8_MAX为无限循环
- * @param  loop_timer_          计数循环的时钟中断周期数
- * @param  priority_ 该节点的函数在相同timer时执行的优先级，0为优先级最高。
+ * @param  reload_              计数循环的时钟中断周期时间/重载时间
+ * @param  priority_            该节点的函数在相同timer时执行的优先级，0为优先级最高。
  * @param  args_                等待执行函数的参数。
  * @param  performance_func_    结果处理回调函数
  * @return MONO_PriorityTimerNode_t*
  * 返回创建好的MONO_PriorityTimerNode_t类型的指针。
  */
 MONO_PriorityTimerNode_t *MONO_CreateQueueNodeFull(
-    MONO_NodeFunction_t node_func_, uint8_t inner_, uint8_t enabled_,
-    MONO_NodeTimer_t timer_, uint8_t loop_, MONO_NodeTimer_t loop_timer_,
-    uint8_t priority_, void *args_, MONO_NodeFunction_t performance_func_);
+        MONO_NodeFunction_t node_func_, uint8_t enabled_,
+        MONO_NodeTimer_t timer_, uint8_t loop_counter_, MONO_NodeTimer_t reload_,
+        uint8_t priority_, void *args_, MONO_NodeFunction_t performance_func_);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // PRIORITY_TIMER_QUEUE_INC_PRIORITY_TIMER_NODE_H_
+#endif// PRIORITY_TIMER_QUEUE_INC_PRIORITY_TIMER_NODE_H_
