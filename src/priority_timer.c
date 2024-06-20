@@ -31,6 +31,10 @@
  * @note version: 3.2
  * @description: 修正了Lock逻辑导致的锁死BUG
  * @date 2024-06-20
+ *
+ * @note version: 3.3
+ * @description: 完善使用闹钟方式进行定时的方案
+ * @date 2024-06-20
  */
 
 #include "priority_timer.h"
@@ -130,11 +134,6 @@ __attribute__((weak)) void MONO_SetNextAlarmTimer(MONO_PRIORITY_TIMER_QUEUE_POIN
   // 默认无实现
 }
 
-void MONO_SetTimerQueueEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
-                              bool status_) {
-  queue_->_run_status = status_;
-}
-
 MONO_PriorityTimerQueue_t *MONO_CreatePriorityQueue() {
   MONO_PriorityTimerQueue_t *queue = MONO_AllocTimerQueue();
   queue->_header_node = NULL;
@@ -179,84 +178,20 @@ void MONO_DestroyPriorityQueue(MONO_PriorityTimerQueue_t **queue_) {
 }
 
 /**
- * @brief  找到合适的位置，将节点node_到队列中
+ * @brief 用于调用设置下次定时器的回掉
  *
- * timer_参数越小越靠近头节点 priority参数越小越靠近头节点
- *
- * @param  queue_:        队列指针
- * @param  node_:         节点指针
- * @return MONO_NodeId_t: 节点id
+ * 在以下情况会被调用
+ * 1.PushNode
+ * 2.当timer为0的节点运行完后
+ * 3.队列启动的时候
  */
-MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
-                            MONO_PriorityTimerNode_t *node_) {
-  // 上锁
-  if (!MONO_TryLockTimerQueue(queue_)) {
-    printf("Err Lock");
-    return false;
+static void NotifyNextAlarmIf(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
+  // 调用下次唤醒
+  if (queue_->_header_node != NULL) {
+    if (queue_->_header_node->_timer > 0) {
+      MONO_SetNextAlarmTimer(queue_, queue_->_header_node->_timer);
+    }
   }
-
-  MONO_NodeId_t result = node_->_id;
-
-  do {
-
-    MONO_PriorityTimerNode_t **headerNode;
-    // 这里分是否为启用节点的情况
-    if (node_->_enabled) {
-      // 主队列
-      headerNode = &queue_->_header_node;
-    } else {
-      // 缓存队列
-      headerNode = &queue_->_disabled_header;
-    }
-    // 没有头节点的情况
-    if ((*headerNode) == NULL) {
-      *headerNode = node_;
-      queue_->_size++;
-      break;
-    }
-
-    MONO_PriorityTimerNode_t *tempNode = *headerNode;
-    MONO_PriorityTimerNode_t *prevNode = NULL;
-    // 非头节点情况
-    // 首先查找到合适的timer位置
-    bool insertFlag = false;
-    while (tempNode != NULL) {
-
-      // TODO 减小缓存队列的开销
-      if ((node_->_timer < tempNode->_timer) ||    // 时间小于这个节点
-          ((node_->_timer == tempNode->_timer) &&  // 时间等于这个节点并且
-           (node_->_priority < tempNode->_priority)// 优先级小于这个节点
-           )) {
-        // 插入到这个节点的前面
-        if (prevNode == NULL) {
-          // 插入到头节点
-          *headerNode = node_;
-          node_->_next = tempNode;
-        } else {
-          // 非头节点
-          node_->_next = prevNode->_next;
-          prevNode->_next = node_;
-        }
-        queue_->_size++;
-        insertFlag = true;
-        break;
-      }
-
-      prevNode = tempNode;
-      tempNode = tempNode->_next;
-    }
-
-    if (insertFlag) {
-      break;
-    }
-    prevNode->_next = node_;
-    node_->_next = NULL;
-    queue_->_size++;
-
-  } while (false);
-
-  MONO_UnlockTimerQueue(queue_);
-  return result;
 }
 
 /**
@@ -329,6 +264,90 @@ static bool MONO_RunNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
     }
     return true;
   }
+}
+
+void MONO_SetTimerQueueEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                              bool status_) {
+  queue_->_run_status = status_;
+  if (queue_->_run_status == true) {
+    // -----> Call Alarm
+    NotifyNextAlarmIf(queue_);
+  }
+}
+
+MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                            MONO_PriorityTimerNode_t *node_) {
+  // 上锁
+  if (!MONO_TryLockTimerQueue(queue_)) {
+    printf("Err Lock");
+    return false;
+  }
+
+  MONO_NodeId_t result = node_->_id;
+
+  do {
+
+    MONO_PriorityTimerNode_t **headerNode;
+    // 这里分是否为启用节点的情况
+    if (node_->_enabled) {
+      // 主队列
+      headerNode = &queue_->_header_node;
+    } else {
+      // 缓存队列
+      headerNode = &queue_->_disabled_header;
+    }
+    // 没有头节点的情况
+    if ((*headerNode) == NULL) {
+      *headerNode = node_;
+      queue_->_size++;
+      break;
+    }
+
+    MONO_PriorityTimerNode_t *tempNode = *headerNode;
+    MONO_PriorityTimerNode_t *prevNode = NULL;
+    // 非头节点情况
+    // 首先查找到合适的timer位置
+    bool insertFlag = false;
+    while (tempNode != NULL) {
+
+      // TODO 减小缓存队列的开销
+      if ((node_->_timer < tempNode->_timer) ||    // 时间小于这个节点
+          ((node_->_timer == tempNode->_timer) &&  // 时间等于这个节点并且
+           (node_->_priority < tempNode->_priority)// 优先级小于这个节点
+           )) {
+        // 插入到这个节点的前面
+        if (prevNode == NULL) {
+          // 插入到头节点
+          *headerNode = node_;
+          node_->_next = tempNode;
+        } else {
+          // 非头节点
+          node_->_next = prevNode->_next;
+          prevNode->_next = node_;
+        }
+        queue_->_size++;
+        insertFlag = true;
+        break;
+      }
+
+      prevNode = tempNode;
+      tempNode = tempNode->_next;
+    }
+
+    if (insertFlag) {
+      break;
+    }
+    prevNode->_next = node_;
+    node_->_next = NULL;
+    queue_->_size++;
+
+  } while (false);
+
+  MONO_UnlockTimerQueue(queue_);
+
+  // -----> Call Alarm
+  NotifyNextAlarmIf(queue_);
+  return result;
 }
 
 uint8_t MONO_Size(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
@@ -541,10 +560,6 @@ uint32_t MONO_TimerTickStep(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t
     // 未开启
     return UINT32_MAX;
   }
-  // // Lock!
-  // if (!MONO_TryLockTimerQueue(queue_)) {
-  //   return UINT32_MAX;
-  // }
 
   // 补偿定时时间
   {
@@ -576,25 +591,15 @@ uint32_t MONO_TimerTickStep(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t
       if (MONO_RunNode(runableNode)) {
         MONO_PushNode(queue_, runableNode);
       } else {
+        // -----> Call Alarm
+        NotifyNextAlarmIf(queue_);
         MONO_DeallocNode(runableNode);
       }
       resultCount++;
     }
   }
 
-  // 调用下次唤醒
-  if (queue_->_header_node != NULL) {
-    if (queue_->_header_node->_timer > 0) {
-      MONO_SetNextAlarmTimer(queue_, queue_->_header_node->_timer);
-    }
-  }
-
-  // MONO_UnlockTimerQueue(queue_);
   return resultCount;
-}
-
-uint32_t MONO_TimerInnerHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
-  return MONO_TimerTickHandler(queue_);
 }
 
 #ifdef MONO_PTQ_DEBUG

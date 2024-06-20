@@ -186,15 +186,6 @@ MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                             MONO_PriorityTimerNode_t *node_);
 
 /**
- * @brief 增加定时器并 运行当前定时器周期数为零的所有节点中的函数
- *
- * @param queue_: 队列指针
- * @deprecated 将在3.2版本移除 使用MONO_TimerTickHandler替代
- * @return uint16_t 返回运行了的节点数量 如果为UINT32_MAX则是队列运行失败
- */
-uint32_t MONO_TimerInnerHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
-
-/**
  * @brief 获取队列中的数量
  * @param queue_: 队列指针
  * @return 如果当前队列为空则返回0
