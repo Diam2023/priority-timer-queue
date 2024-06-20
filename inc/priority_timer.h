@@ -138,7 +138,7 @@ MONO_PriorityTimerQueue_t *MONO_CreatePriorityQueue(void);
  * @brief 销毁队列并释放内存
  * @param  queue_: 队列指针
  */
-void MONO_DestroyPriorityQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
+void MONO_DestroyPriorityQueue(MONO_PriorityTimerQueue_t **queue_);
 
 /**
  * @brief 尝试锁定队列 非阻塞 用户可重载
@@ -152,6 +152,13 @@ bool MONO_TryLockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
  * @brief 解锁队列 用户可重载
  */
 void MONO_UnlockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
+
+/**
+ * @brief 设置下次到点的函数 用户需要实现该函数 到点后需要调用MONO_NextTimerAlarm
+ *
+ * @param timer_ 时间
+ */
+void MONO_SetNextAlarmTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, MONO_NodeTimer_t timer_);
 
 /// ***************************************** USER
 
@@ -182,15 +189,10 @@ MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
  * @brief 增加定时器并 运行当前定时器周期数为零的所有节点中的函数
  *
  * @param queue_: 队列指针
+ * @deprecated 将在3.2版本移除 使用MONO_TimerTickHandler替代
  * @return uint16_t 返回运行了的节点数量 如果为UINT32_MAX则是队列运行失败
  */
 uint32_t MONO_TimerInnerHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
-
-/**
- * @brief 运行当前定时周期数为零且为中断内部执行的所有节点中的函数
- * @param queue_: 队列指针
- */
-uint32_t MONO_TimerHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 
 /**
  * @brief 获取队列中的数量
@@ -290,7 +292,23 @@ uint16_t MONO_PushNodeFullArguments(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
  * @since v2.2
  * @return uint32_t TimeTick
  */
-uint32_t MONO_GetTimeTick(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
+uint32_t MONO_GetTimerTick(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
+
+/**
+ * @brief 补偿1点TimerTick 并运行当前定时器周期数为零的所有节点中的函数
+ *
+ * @since v3.1
+ * @return uint16_t 返回运行了的节点数量 如果为UINT32_MAX则是队列运行失败
+ */
+uint32_t MONO_TimerTickHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
+
+/**
+ * @brief 补偿step_点TimeTick 并运行可运行的节点
+ *
+ * @since v3.1
+ * @param uint32_t-step_ 步长
+ */
+uint32_t MONO_TimerTickStep(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t step_);
 
 #ifdef MONO_PTQ_DEBUG
 /**
