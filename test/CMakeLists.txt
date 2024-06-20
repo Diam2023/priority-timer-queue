@@ -9,7 +9,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE libmono pthread)
 target_include_directories(${PROJECT_NAME} PRIVATE ./inc)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    MONO_PTQ_DEBUG
+    # MONO_PTQ_DEBUG
 )
 
 # Validate that libmono code is compatible with C standard

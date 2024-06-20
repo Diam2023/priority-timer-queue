@@ -35,6 +35,11 @@
  * @note version: 3.3
  * @description: 完善使用闹钟方式进行定时的方案
  * @date 2024-06-20
+ *
+ * @note version: 3.4
+ * @description: 增加Clear API
+ * @date 2024-06-20
+ *
  */
 
 #include "priority_timer.h"
@@ -146,6 +151,53 @@ MONO_PriorityTimerQueue_t *MONO_CreatePriorityQueue() {
   return queue;
 }
 
+
+void MONO_ClearPriorityQueue(MONO_PriorityTimerQueue_t *queue_) {
+  if (queue_ == NULL) {
+    return;
+  }
+
+  // 阻塞直到获取锁
+  while (!MONO_TryLockTimerQueue(queue_)) {
+  }
+
+  // 回收运行中的节点
+  MONO_PriorityTimerNode_t *tempNode = queue_->_header_node;
+  MONO_PriorityTimerNode_t *nextNode = NULL;
+  // 回收节点内存
+  while (tempNode != NULL) {
+    if (tempNode->_next != NULL) {
+      nextNode = tempNode->_next;
+      MONO_DeallocNode(tempNode);
+      tempNode = nextNode;
+    } else {
+      MONO_DeallocNode(tempNode);
+      tempNode = NULL;
+    }
+  }
+
+  // 回收关闭的节点的内存
+  tempNode = queue_->_disabled_header;
+  nextNode = NULL;
+  // 回收节点内存
+  while (tempNode != NULL) {
+    if (tempNode->_next != NULL) {
+      nextNode = tempNode->_next;
+      MONO_DeallocNode(tempNode);
+      tempNode = nextNode;
+    } else {
+      MONO_DeallocNode(tempNode);
+      tempNode = NULL;
+    }
+  }
+
+  queue_->_size = 0;
+  queue_->_header_node = NULL;
+  queue_->_disabled_header = NULL;
+
+  MONO_UnlockTimerQueue(queue_);
+}
+
 void MONO_DestroyPriorityQueue(MONO_PriorityTimerQueue_t **queue_) {
   if (queue_ == NULL) {
     return;
@@ -159,19 +211,9 @@ void MONO_DestroyPriorityQueue(MONO_PriorityTimerQueue_t **queue_) {
     return;
   }
 
-  MONO_PriorityTimerNode_t *tempNode = (*queue_)->_header_node;
-  MONO_PriorityTimerNode_t *nextNode;
-  // 回收节点内存
-  while (tempNode != NULL) {
-    if (tempNode->_next != NULL) {
-      nextNode = tempNode->_next;
-      MONO_DeallocNode(tempNode);
-      tempNode = nextNode;
-    } else {
-      MONO_DeallocNode(tempNode);
-      tempNode = NULL;
-    }
-  }
+  (*queue_)->_run_status = false;
+
+  MONO_ClearPriorityQueue(*queue_);
 
   MONO_DeallocTimerQueue(*queue_);
   *queue_ = NULL;
@@ -279,7 +321,6 @@ MONO_NodeId_t MONO_PushNode(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                             MONO_PriorityTimerNode_t *node_) {
   // 上锁
   if (!MONO_TryLockTimerQueue(queue_)) {
-    printf("Err Lock");
     return false;
   }
 
@@ -461,26 +502,22 @@ bool MONO_SetTimerNodeEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                              MONO_NodeTimer_t id_, bool enable_) {
   // 跳过无效参数
   if ((id_ == UINT32_MAX) || (id_ == 0)) {
-    printf("Err Id");
     return false;
   }
 
   MONO_PriorityTimerNode_t *findNode = MONO_FindNodeById(queue_, id_);
   if (findNode == NULL) {
-    printf("Err Find ID");
     return false;
   }
 
   // 判断是否不需要操作
   if (findNode->_enabled == enable_) {
-    printf("Enabel Skip");
     return true;
   }
 
   // 需要操作
   MONO_PriorityTimerNode_t *popNode = MONO_PopNodeById(queue_, id_);
   if (popNode == NULL) {
-    printf("Pop Err");
     return false;
   }
   popNode->_next = NULL;

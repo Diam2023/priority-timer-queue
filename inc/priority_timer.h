@@ -56,6 +56,10 @@
  * @description: 升级定时器接口实现API
  * @date 2025-06-13
  *
+ * @note version: 3.4
+ * @description: 增加Clear API
+ * @date 2024-06-20
+ *
  * *********************************************************************************
  */
 
@@ -69,7 +73,30 @@ extern "C" {
 #define MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT \
   MONO_PriorityTimerQueue_t *queue_
 
-#define CreatePriorityTimerQueue() MONO_CreatePriorityQueue();
+
+#define NewTimerQueue()                           MONO_CreatePriorityQueue()
+#define DeleteTimerQueue(queue_)                  MONO_DestroyPriorityQueue(&queue_)
+
+#define ClearTimerQueue(queue_)                   MONO_ClearPriorityQueue(queue_)
+
+#define NewTimerTask(queue_, func_, timer_, arg_) MONO_PushNode(queue_, MONO_CreateQueueNode((MONO_NodeFunction_t) func_, timer_, arg_))
+
+#define EnableTimerQueue(queue_)                  MONO_SetTimerQueueEnable(queue_, true)
+#define DisableTimerQueue(queue_)                 MONO_SetTimerQueueEnable(queue_, false)
+
+#define EnableTimerTask(queue_, id_)              MONO_SetTimerNodeEnable(queue_, id_, true)
+#define DisableTimerTask(queue_, id_)             MONO_SetTimerNodeEnable(queue_, id_, false)
+
+// 跳过tick时间
+#define TimerTickStep                             MONO_TimerTickStep
+// tick+1
+#define TimerTickHandler                          MONO_TimerTickHandler
+
+#define TryLockOverride                           bool MONO_TryLockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT)
+#define UnlockOverride                            void MONO_UnlockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT)
+
+// 设置下次处理队列的时间
+#define SetNextAlarmTimer                         void MONO_SetNextAlarmTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, MONO_NodeTimer_t timer_)
 
 #include "priority_timer_node.h"
 
@@ -139,6 +166,13 @@ MONO_PriorityTimerQueue_t *MONO_CreatePriorityQueue(void);
  * @param  queue_: 队列指针
  */
 void MONO_DestroyPriorityQueue(MONO_PriorityTimerQueue_t **queue_);
+
+/**
+ * @brief 清空队列元素
+ *
+ * @param queue_: 队列指针
+ */
+void MONO_ClearPriorityQueue(MONO_PriorityTimerQueue_t *queue_);
 
 /**
  * @brief 尝试锁定队列 非阻塞 用户可重载
@@ -308,6 +342,10 @@ uint32_t MONO_TimerTickStep(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t
  * @return uint32_t
  */
 void MONO_QueueTaskInfo(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
+
+#else
+
+#define MONO_QueueTaskInfo(...) (void) 0
 
 #endif
 

@@ -34,17 +34,21 @@ static MONO_NodeId_t testTaskId2;
 static MONO_NodeId_t testTaskId3;
 
 
+/// ***************************************************8
+
 // Mutex
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-bool MONO_TryLockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
+TryLockOverride {
   // return pthread_mutex_trylock(&mutex);
   return pthread_mutex_lock(&mutex) == 0;
 }
 
-void MONO_UnlockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
+UnlockOverride {
   pthread_mutex_unlock(&mutex);
 }
+
+/// ***************************************************8
 
 // 模拟定时器
 uint32_t sleepTime = 0;
@@ -62,7 +66,7 @@ void *timer(void *arg) {
         usleep(1000);
         sleepTime--;
         if (sleepTime <= 0) {
-          MONO_TimerTickStep(queue, tempStep);
+          TimerTickStep(queue, tempStep);
         }
       }
     }
@@ -77,7 +81,7 @@ void *timer(void *arg) {
   return NULL;
 }
 
-void MONO_SetNextAlarmTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, MONO_NodeTimer_t timer_) {
+SetNextAlarmTimer {
   if (sleepTime == 0) {
     printf("设置下次唤醒 %u\n", timer_);
   } else {
@@ -92,28 +96,39 @@ void MONO_SetNextAlarmTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, MONO_Nod
 void *test(void *arg) {
   printf("Test Start \n");
 
-  testTaskId1 = MONO_PushNode(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_1, 1000, NULL));
-  testTaskId2 = MONO_PushNode(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_2, 1400, NULL));
-  testTaskId3 = MONO_PushNode(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_3, 1123, NULL));
+  NewTimerTask(queue, (MONO_NodeFunction_t) func_3, 2000, NULL);
 
-  MONO_SetTimerNodeEnable(queue, testTaskId2, false);
+  // 清空队列
+  ClearTimerQueue(queue);
+
+  testTaskId1 = NewTimerTask(queue, func_1, 1000, NULL);
+  testTaskId2 = NewTimerTask(queue, (MONO_NodeFunction_t) func_2, 1400, NULL);
+  testTaskId3 = NewTimerTask(queue, (MONO_NodeFunction_t) func_3, 1123, NULL);
+  ClearTimerQueue(queue);
+
+  testTaskId1 = NewTimerTask(queue, (MONO_NodeFunction_t) func_1, 1000, NULL);
+  testTaskId2 = NewTimerTask(queue, (MONO_NodeFunction_t) func_2, 1400, NULL);
+  testTaskId3 = NewTimerTask(queue, (MONO_NodeFunction_t) func_3, 1123, NULL);
+
+  DisableTimerTask(queue, testTaskId2);
   MONO_QueueTaskInfo(queue);
 
   sleep(5);
   printf("13 run end \n");
   MONO_QueueTaskInfo(queue);
-  MONO_SetTimerNodeEnable(queue, testTaskId3, false);
-  MONO_SetTimerNodeEnable(queue, testTaskId2, true);
+  DisableTimerTask(queue, testTaskId3);
+  EnableTimerTask(queue, testTaskId2);
   sleep(3);
   printf("12 run end \n");
   MONO_QueueTaskInfo(queue);
-  MONO_SetTimerNodeEnable(queue, testTaskId3, true);
+  EnableTimerTask(queue, testTaskId3);
   sleep(2);
   printf("123 run end \n");
 
+  DisableTimerTask(queue, testTaskId2);
   MONO_QueueTaskInfo(queue);
   // 回收内存
-  MONO_DestroyPriorityQueue(&queue);
+  DeleteTimerQueue(queue);
 
   pthread_join(timerThread, NULL);
 
@@ -123,12 +138,11 @@ void *test(void *arg) {
 }
 
 void init() {
-  // pthread_mutex_init(&mutex, NULL);
-  queue = CreatePriorityTimerQueue();
+  queue = NewTimerQueue();
 
   pthread_create(&timerThread, NULL, timer, NULL);
   pthread_create(&testThread, NULL, test, NULL);
-  MONO_SetTimerQueueEnable(queue, true);
+  EnableTimerQueue(queue);
 }
 
 int main() {
