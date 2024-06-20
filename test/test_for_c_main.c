@@ -10,6 +10,7 @@
  *
  */
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -45,47 +46,70 @@ void MONO_UnlockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
   pthread_mutex_unlock(&mutex);
 }
 
-/**
- * @brief 定时器
- *
- * @param arg
- * @return void*
- */
+// 模拟定时器
+uint32_t sleepTime = 0;
+
+uint32_t tempStep = 0;
+
 void *timer(void *arg) {
   (void) arg;
   usleep(1000000);
 
   while (true) {
-    MONO_TimerTickHandler(queue);
+    if (sleepTime != 0) {
+      while (sleepTime > 0) {
+        // 1ms 一次
+        usleep(1000);
+        sleepTime--;
+        if (sleepTime <= 0) {
+          MONO_TimerTickStep(queue, tempStep);
+        }
+      }
+    }
+    // MONO_TimerTickHandler(queue);
     if (queue == NULL) {
       printf("定时队列退出\n");
       break;
     }
-    // 1ms 一次
-    usleep(1000);
+    // usleep(1000);
   }
 
   return NULL;
+}
+
+void MONO_SetNextAlarmTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, MONO_NodeTimer_t timer_) {
+  if (sleepTime == 0) {
+    printf("设置下次唤醒 %u\n", timer_);
+  } else {
+    if (timer_ != sleepTime) {
+      printf("重置唤醒 %u to %u\n", sleepTime, timer_);
+    }
+  }
+  sleepTime = timer_;
+  tempStep = timer_;
 }
 
 void *test(void *arg) {
   printf("Test Start \n");
 
   testTaskId1 = MONO_PushNode(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_1, 1000, NULL));
-  testTaskId2 = MONO_PushNode(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_2, 1000, NULL));
-  testTaskId3 = MONO_PushNode(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_3, 1000, NULL));
+  testTaskId2 = MONO_PushNode(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_2, 1400, NULL));
+  testTaskId3 = MONO_PushNode(queue, MONO_CreateQueueNode((MONO_NodeFunction_t) func_3, 1123, NULL));
 
   MONO_SetTimerNodeEnable(queue, testTaskId2, false);
-
   MONO_QueueTaskInfo(queue);
+
   sleep(5);
-  printf("12 run end \n");
+  printf("13 run end \n");
+  MONO_QueueTaskInfo(queue);
   MONO_SetTimerNodeEnable(queue, testTaskId3, false);
   MONO_SetTimerNodeEnable(queue, testTaskId2, true);
-  MONO_QueueTaskInfo(queue);
   sleep(3);
+  printf("12 run end \n");
+  MONO_QueueTaskInfo(queue);
   MONO_SetTimerNodeEnable(queue, testTaskId3, true);
   sleep(2);
+  printf("123 run end \n");
 
   MONO_QueueTaskInfo(queue);
   // 回收内存
