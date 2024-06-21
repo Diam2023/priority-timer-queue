@@ -47,6 +47,9 @@ static MONO_NodeId_t s_led2TaskId;
 // LED2定时任务回调函数
 void *LED2_BlinkTask(void*)
 
+// 队列启动关闭的回掉 可选
+void StatusChangeCallback(MONO_PriorityTimerQueue_t *queue_, bool status_);
+
 //// ****************** 定时器任务结束
 
 // 定时器中断函数
@@ -68,6 +71,9 @@ int main()
     // 实例化一个定时器任务队列
     s_pMainTaskQueue = NewTimerQueue();
 
+    // 设置定时器启动关闭回调
+    SetTimerQueueStatusChangeCallback(&StatusChangeCallback);
+
     // 新建一个默认优先级的任务以1000个定时周期运行一次
     // 在该例程中为1s
     s_led1TaskId = NewTimerTask(s_pMainTaskQueue, LED1_BlinkTask, 1000, NULL);
@@ -76,9 +82,8 @@ int main()
     s_led2TaskId = NewTimerTask(s_pMainTaskQueue, LED2_BlinkTask, 1500, NULL);
 
     // 开启定时器
+    // 这个API会调用StatusChangeCallback回掉来启动定时器10
     EnableTimerQueue(s_pMainTaskQueue);
-    // 运行Tim10定时器 并打开中断
-    TIM10_Start();
 
     while(true)
     {
@@ -109,6 +114,17 @@ void *LED2_BlinkTask(void*)
 {
     // 反转LED2电平
     HAL_GPIO_TogglePin(...);
+}
+
+void StatusChangeCallback(MONO_PriorityTimerQueue_t *queue_, bool status_)
+{
+    if (status_)
+    {
+        // 运行Tim10定时器 并打开中断
+        TIM10_Start();
+    } else {
+        TIM10_Stop();
+    }
 }
 
 ```

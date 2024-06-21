@@ -148,7 +148,7 @@ typedef struct MONO_PriorityTimerQueue_s {
 } MONO_PriorityTimerQueue_t;
 
 // 状态改变回调函数
-typedef void (*StatusChangeCallback_t)(MONO_PriorityTimerQueue_t *, uint32_t);
+typedef void (*StatusChangeCallback_t)(MONO_PriorityTimerQueue_t *, bool);
 
 /// ***************************************** CORE
 
