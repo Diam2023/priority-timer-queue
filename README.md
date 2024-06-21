@@ -11,6 +11,15 @@ pthread例程参考测试文件[./test/test_for_c_main.c](./test/test_for_c_main
 
 ## 使用方法
 
+
+### 引入项目
+将项目源码在你的项目下, 例如third_party下, 然后在你的cmake内添加如下两行
+```
+target_link_libraries(${PROJECT_NAME} PRIVATE libmono)
+add_subdirectory(third_party/priority-timer-queue)
+```
+
+
 ### #1 定时调用 `TimerTickHandler` 实现
 #### 适用场景
 适用于不定时要获取实时Tick的情况
