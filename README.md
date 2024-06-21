@@ -1,8 +1,23 @@
-# PriorityTimerQueue
+<p align="center">
+  <a href="https://github.com/Diam2023/Bilibili-Tools/">
+    <img src="doc/clock_final.png" width="256" height="256" alt="BiliBili-Tools">
+  </a>
+</p>
+
+<div align="center">
+
+# PriorityTimerQueue - 优先级定时任务管理队列
+
+_✨ libmono 适用单片机的定时任务管理队列 ✨_
+
+</div>
+
+---
+
 
 ## 项目适用于单片机内需要定时处理不同的任务的情况
 
-pthread例程参考测试文件[./test/test_for_c_main.c](./test/test_for_c_main.c)
+例程参考测试文件(pthread)[./test/test_for_c_main.c](./test/test_for_c_main.c)
 
 ## 使用前
 1. 根据需要重写Alloc Dealloc
