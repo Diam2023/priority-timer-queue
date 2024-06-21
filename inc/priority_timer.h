@@ -60,6 +60,11 @@
  * @description: 增加Clear API
  * @date 2024-06-20
  *
+ * @note version: 3.5
+ * @description: 增加 MONO_SetTimerQueueStatusChangeCallback API
+ * * @details 现在可以设置队列启动.关闭的回调函数了
+ * @date 2024-06-21
+ *
  * *********************************************************************************
  */
 
@@ -97,6 +102,9 @@ extern "C" {
 
 // 设置下次处理队列的时间
 #define SetNextAlarmTimer                         void MONO_SetNextAlarmTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, MONO_NodeTimer_t timer_)
+
+// 设置状态改变回调
+#define SetTimerQueueStatusChangeCallback         MONO_SetTimerQueueStatusChangeCallback
 
 #include "priority_timer_node.h"
 
@@ -138,6 +146,9 @@ typedef struct MONO_PriorityTimerQueue_s {
   volatile bool _lock;
 
 } MONO_PriorityTimerQueue_t;
+
+// 状态改变回调函数
+typedef void (*StatusChangeCallback_t)(MONO_PriorityTimerQueue_t *, uint32_t);
 
 /// ***************************************** CORE
 
@@ -334,6 +345,13 @@ uint32_t MONO_TimerTickHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
  * @param uint32_t-step_ 步长
  */
 uint32_t MONO_TimerTickStep(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t step_);
+
+/**
+ * @brief 设置状态改变回调函数
+ *
+ * @param callback_ 回调
+ */
+void MONO_SetTimerQueueStatusChangeCallback(StatusChangeCallback_t callback_);
 
 #ifdef MONO_PTQ_DEBUG
 /**

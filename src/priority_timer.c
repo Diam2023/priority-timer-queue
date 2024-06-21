@@ -56,6 +56,11 @@
  */
 static MONO_NodeId_t MONO_g_ptn_auto_id = 1;
 
+/**
+ * @brief 状态改变回调函数
+ */
+static StatusChangeCallback_t s_pStatusChangeCallback = NULL;
+
 /************************** NODE **************************/
 
 __attribute__((weak)) MONO_PriorityTimerNode_t *MONO_AllocNode() {
@@ -310,10 +315,19 @@ static bool MONO_RunNode(MONO_PRIORITY_TIMER_NODE_POINTER_ARGUMENT) {
 
 void MONO_SetTimerQueueEnable(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                               bool status_) {
-  queue_->_run_status = status_;
-  if (queue_->_run_status == true) {
-    // -----> Call Alarm
-    NotifyNextAlarmIf(queue_);
+
+  if (queue_->_run_status != status_) {
+
+    queue_->_run_status = status_;
+    if (queue_->_run_status == true) {
+      // -----> Call Alarm
+      NotifyNextAlarmIf(queue_);
+    }
+
+    if (s_pStatusChangeCallback != NULL) {
+      // 唤醒状态改变回调
+      s_pStatusChangeCallback(queue_, status_);
+    }
   }
 }
 
@@ -637,6 +651,10 @@ uint32_t MONO_TimerTickStep(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t
   }
 
   return resultCount;
+}
+
+void MONO_SetTimerQueueStatusChangeCallback(StatusChangeCallback_t callback_) {
+  s_pStatusChangeCallback = callback_;
 }
 
 #ifdef MONO_PTQ_DEBUG
