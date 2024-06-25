@@ -65,6 +65,10 @@
  * * @details 现在可以设置队列启动.关闭的回调函数了
  * @date 2024-06-21
  *
+ * @note version: 3.6
+ * @description: 修改API setLoopTimer 为 SetReload
+ * @date 2024-06-21
+ *
  * *********************************************************************************
  */
 
@@ -275,14 +279,14 @@ bool MONO_SetTimerNodeTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
 /**
  * @brief 设置节点运行循环时间
  *
- * @since 2.5
+ * @since 3.6
  * @param queue_: 队列指针
  * @param id_ 定时器队列任务启用状态
  * @param timer_ 时间
  * @return true 成功
  * @return false 失败
  */
-bool MONO_SetTimerNodeLoopTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+bool MONO_SetTimerNodeReload(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
                                 MONO_NodeTimer_t id_,
                                 const MONO_NodeTimer_t timer_);
 

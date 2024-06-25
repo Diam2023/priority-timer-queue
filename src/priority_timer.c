@@ -553,13 +553,13 @@ bool MONO_SetTimerNodeTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
   return false;
 }
 
-bool MONO_SetTimerNodeLoopTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
-                                MONO_NodeTimer_t id_,
-                                const MONO_NodeTimer_t timer_) {
+bool MONO_SetTimerNodeReload(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
+                             MONO_NodeTimer_t id_,
+                             const MONO_NodeTimer_t timer_) {
   MONO_PriorityTimerNode_t *node = MONO_FindNodeById(queue_, id_);
 
   if (node != NULL) {
-    node->_timer = timer_;
+    node->_reload = timer_;
     return true;
   }
 
