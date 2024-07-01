@@ -145,6 +145,11 @@ typedef struct MONO_PriorityTimerQueue_s {
   bool _run_status;
 
   /**
+   * Now Running Node, null if NONE exist
+   */
+  MONO_PriorityTimerNode_t *_running_node;
+
+  /**
    * @brief 读写锁
    */
   volatile bool _lock;
@@ -287,8 +292,8 @@ bool MONO_SetTimerNodeTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
  * @return false 失败
  */
 bool MONO_SetTimerNodeReload(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT,
-                                MONO_NodeTimer_t id_,
-                                const MONO_NodeTimer_t timer_);
+                             MONO_NodeTimer_t id_,
+                             const MONO_NodeTimer_t timer_);
 
 /**
  * @brief 节点是否存在于队列中
@@ -349,6 +354,13 @@ uint32_t MONO_TimerTickHandler(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
  * @param uint32_t-step_ 步长
  */
 uint32_t MONO_TimerTickStep(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t step_);
+
+/**
+ * Get In Running Node Obj
+ * @param queue_ queue
+ * @return Node Pointer
+ */
+MONO_PriorityTimerNode_t* MONO_GetRunningNodePtr(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT);
 
 /**
  * @brief 设置状态改变回调函数

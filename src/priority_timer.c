@@ -152,6 +152,7 @@ MONO_PriorityTimerQueue_t *MONO_CreatePriorityQueue() {
   queue->_run_status = false;
   queue->_size = 0;
   queue->_timer_tick = 0;
+  queue->_running_node = NULL;
 
   return queue;
 }
@@ -639,7 +640,10 @@ uint32_t MONO_TimerTickStep(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t
   {
     MONO_PriorityTimerNode_t *runableNode = NULL;
     while ((runableNode = MONO_PopRunableNode(queue_)) != NULL) {
-      if (MONO_RunNode(runableNode)) {
+      queue_->_running_node = runableNode;
+      const bool runNodeResult = MONO_RunNode(runableNode);
+      queue_->_running_node = NULL;
+      if (runNodeResult) {
         MONO_PushNode(queue_, runableNode);
       } else {
         // -----> Call Alarm
@@ -651,6 +655,10 @@ uint32_t MONO_TimerTickStep(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, uint32_t
   }
 
   return resultCount;
+}
+
+MONO_PriorityTimerNode_t *MONO_GetRunningNodePtr(MONO_PriorityTimerQueue_t *queue_) {
+  return queue_->_running_node;
 }
 
 void MONO_SetTimerQueueStatusChangeCallback(StatusChangeCallback_t callback_) {

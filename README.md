@@ -8,7 +8,7 @@
 
 # PriorityTimerQueue - 优先级定时任务管理队列
 
-_✨ libmono 适用单片机的定时任务管理队列 ✨_
+_✨ libmono 适用单片机的定时任务管理队列 Ver:3.7 ✨_
 
 </div>
 
@@ -220,7 +220,7 @@ valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all
 ```bash
 ❯ valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all ./build/test/libmono_test
 ==100973== Memcheck, a memory error detector
-==100973== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==100973== Copyright (C) 2002-2024, and GNU GPL\'d, by Julian Seward et al.
 ==100973== Using Valgrind-3.23.0 and LibVEX; rerun with -h for copyright info
 ==100973== Command: ./build/test/libmono_test
 ==100973== 
