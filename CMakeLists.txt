@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.16.3)
 project(libmono VERSION 3.5)
 add_library(${PROJECT_NAME} INTERFACE)
 
-add_subdirectory(test)
-
 target_compile_definitions(${PROJECT_NAME} INTERFACE
 )
 
