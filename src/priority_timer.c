@@ -142,6 +142,10 @@ MONO_UnlockTimerQueue(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT) {
 
 __attribute__((weak)) void MONO_SetNextAlarmTimer(MONO_PRIORITY_TIMER_QUEUE_POINTER_ARGUMENT, MONO_NodeTimer_t timer_) {
   // 默认无实现
+  (void) timer_;
+  if (queue_ == NULL) {
+    return;
+  }
 }
 
 MONO_PriorityTimerQueue_t *MONO_CreatePriorityQueue() {
